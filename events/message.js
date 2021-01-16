@@ -56,35 +56,36 @@ module.exports = async (client, message) => {
 
     if(data.plugins.protection.antilink) {
         if(/discord(?:(?:app)?\.com\/invite|\.gg(?:\/invite)?)\/([\w-]{2,255})/i.test(message.content)) {
-            if(!message.guild.member(message.author).hasPermission("MANAGE_MESSAGES"));
-            return message.delete().then(() => {
-                if(data.plugins.logs.enabled && data.plugins.logs.channel) {
-                    let embed = {
-                        color: 'RED',
-                        author: {
-                            name: message.author.username,
-                            icon_url: message.author.displayAvatarURL({ dynamic: true })
-                        },
-                        description: `${message.author} a envoyé une pub dans ${message.channel}!`,
-                        fields: [
-                            {
-                                name: "Message d'origine",
-                                value: message.content
+            if(!message.guild.member(message.author).hasPermission("MANAGE_MESSAGES")) {
+                return message.delete().then(() => {
+                    if(data.plugins.logs.enabled && data.plugins.logs.channel) {
+                        let embed = {
+                            color: 'RED',
+                            author: {
+                                name: message.author.username,
+                                icon_url: message.author.displayAvatarURL({ dynamic: true })
+                            },
+                            description: `${message.author} a envoyé une pub dans ${message.channel}!`,
+                            fields: [
+                                {
+                                    name: "Message d'origine",
+                                    value: message.content
+                                }
+                            ],
+                            footer: {
+                                text: client.config.embed.footer,
+                                icon_url: client.user.displayAvatarURL()
                             }
-                        ],
-                        footer: {
-                            text: client.config.embed.footer,
-                            icon_url: client.user.displayAvatarURL()
                         }
-                    }
 
-                    if(embed.fields[0].value.length > 1000) {
-                        embed.fields[0].value = message.content.slice(0, 1000) + "...";
-                    }
+                        if(embed.fields[0].value.length > 1000) {
+                            embed.fields[0].value = message.content.slice(0, 1000) + "...";
+                        }
 
-                    message.guild.channels.cache.get(data.plugins.logs.channel).send({ embed: embed });
-                }
-            })
+                        message.guild.channels.cache.get(data.plugins.logs.channel).send({ embed: embed });
+                    }
+                })
+            }
         }
     }
 
