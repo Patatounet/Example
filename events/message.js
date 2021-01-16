@@ -54,31 +54,35 @@ module.exports = async (client, message) => {
         message.channel.send(`Hey ${message.author} ! Mon préfixe est \`${data.prefix}\` dans ce serveur, fais \`${data.prefix}help\` pour avoir de l'aide !`);
     }
 
-    if(data.plugins.protection.antilink === true) {
-        if(message.content.match(/(discord|\.gg\/.+|discordapp\.com\/invite\/.+|discord\.com\/invite\/.+)/g)) {
-            if(!message.member.permissionsIn(message.channel).has("MANAGE_MESSAGES")) 
+    if(data.plugins.protection.antilink) {
+        if(/discord(?:(?:app)?\.com\/invite|\.gg(?:\/invite)?)\/([\w-]{2,255})/i.test(message.content)) {
+            if(!message.guild.member(message.author).hasPermission("MANAGE_MESSAGES"));
             return message.delete().then(() => {
                 if(data.plugins.logs.enabled && data.plugins.logs.channel) {
-                    message.guild.channels.cache.get(data.plugins.logs.channel).send({
-                        embed: {
-                            color: 'RED',
-                            author: {
-                                name: message.author.username,
-                                icon_url: message.author.displayAvatarURL({ dynamic: true })
-                            },
-                            description: `${message.author} a envoyé une pub dans ${message.channel}! \nElle a donc été supprimée.`,
-                            fields: [
-                                {
-                                    name: "Message d'origine",
-                                    value: message.content
-                                }
-                            ],
-                            footer: {
-                                text: client.config.embed.footer,
-                                icon_url: client.user.displayAvatarURL()
+                    let embed = {
+                        color: 'RED',
+                        author: {
+                            name: message.author.username,
+                            icon_url: message.author.displayAvatarURL({ dynamic: true })
+                        },
+                        description: `${message.author} a envoyé une pub dans ${message.channel}!`,
+                        fields: [
+                            {
+                                name: "Message d'origine",
+                                value: message.content
                             }
+                        ],
+                        footer: {
+                            text: client.config.embed.footer,
+                            icon_url: client.user.displayAvatarURL()
                         }
-                    })
+                    }
+
+                    if(embed.fields[0].value.length > 1000) {
+                        embed.fields[0].value = message.content.slice(0, 1000) + "...";
+                    }
+
+                    message.guild.channels.cache.get(data.plugins.logs.channel).send({ embed: embed });
                 }
             })
         }
