@@ -4,8 +4,6 @@ const Guild = require('../models/Guild');
 module.exports = async (client, message) => {
     if(message.channel.type === "dm" || message.author.bot) return;
 
-    if(!message.guild.me.permissionsIn(message.channel).has("SEND_MESSAGES") || !message.guild.me.permissionsIn(message.channel).has("READ_MESSAGE_HISTORY")) return message.author.send(`⚠️ ${message.author}, je n'ai pas les permissions de parler ou de voir l'historique de message dans ce salon !`).catch(() => {});
-
     if(!message.member) await message.guild.fetchMember(message.author);
 
     if(message.content.includes(client.token)) {
@@ -50,8 +48,10 @@ module.exports = async (client, message) => {
         }
     })
 
-    if(message.content.match(new RegExp(`^<@!?${client.user.id}>( |)$`))) {
-        message.channel.send(`Hey ${message.author} ! Mon préfixe est \`${data.prefix}\` dans ce serveur, fais \`${data.prefix}help\` pour avoir de l'aide !`);
+    if(message.guild.me.permissionsIn(message.channel).has('SEND_MESSAGES')) {
+        if(message.content.match(new RegExp(`^<@!?${client.user.id}>( |)$`))) {
+            message.channel.send(`Hey ${message.author} ! Mon préfixe est \`${data.prefix}\` dans ce serveur, fais \`${data.prefix}help\` pour avoir de l'aide !`);
+        }
     }
 
     if(data.plugins.protection.antilink) {
@@ -91,6 +91,8 @@ module.exports = async (client, message) => {
 
     if(!message.content.startsWith(prefix) || message.webhookID) return;
 
+    if(!message.guild.me.permissionsIn(message.channel).has("SEND_MESSAGES") || !message.guild.me.permissionsIn(message.channel).has("READ_MESSAGE_HISTORY")) return message.author.send(`⚠️ ${message.author}, je n'ai pas les permissions de parler ou de voir l'historique de message dans ce salon !`).catch(() => {});
+    
     const args = message.content.slice(prefix.length).split(/ +/);
     const commandName = args.shift().toLowerCase();
     const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.help.aliases && cmd.help.aliases.includes(commandName));
