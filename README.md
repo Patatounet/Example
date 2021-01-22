@@ -65,6 +65,7 @@ Si vous souhaitez tout réinitialiser la config, faites `?reset-config` :(
 
 [Inviter le bot](https://discord.com/oauth2/authorize?client_id=781911855299035217&scope=bot&permissions=2147483647)
  • [Serveur support](https://discord.gg/SSWQamBCFE)
+ • [Voter pour le bot](https://shadow-bot.fr/bot/781911855299035217)
  • [Crédits](https://github.com/Androz2091/AtlantaBot)
 
 ## Licence
