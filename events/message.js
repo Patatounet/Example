@@ -90,13 +90,13 @@ module.exports = async (client, message) => {
     }
 
     if(!message.content.startsWith(prefix) || message.webhookID) return;
-
-    if(!message.guild.me.permissionsIn(message.channel).has("SEND_MESSAGES") || !message.guild.me.permissionsIn(message.channel).has("READ_MESSAGE_HISTORY")) return message.author.send(`⚠️ ${message.author}, je n'ai pas les permissions de parler ou de voir l'historique de message dans ce salon !`).catch(() => {});
     
     const args = message.content.slice(prefix.length).split(/ +/);
     const commandName = args.shift().toLowerCase();
     const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.help.aliases && cmd.help.aliases.includes(commandName));
     if(!command) return;
+    
+    if(!message.guild.me.permissionsIn(message.channel).has("SEND_MESSAGES") || !message.guild.me.permissionsIn(message.channel).has("READ_MESSAGE_HISTORY")) return message.author.send(`⚠️ ${message.author}, je n'ai pas les permissions de parler ou de voir l'historique de message dans le salon ${message.channel} !`).catch(() => {});
 
     if(command.help.botPerms.length > 0) {
         if(!message.guild.me.permissionsIn(message.channel).has(command.help.botPerms)) {
