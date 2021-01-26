@@ -100,7 +100,7 @@ module.exports = async (client, message) => {
 
     if(command.help.botPerms.length > 0) {
         if(!message.guild.me.permissionsIn(message.channel).has(command.help.botPerms)) {
-            return message.channel.send(`⚠️ ${message.author}, je n\'ai pas les permissions nécessaires pour faire cette commande. \nJ\'ai besoin des permissions suivantes: ${command.help.botPerms.map(perm => `\`${perm}\``).join(', ')}`)
+            return message.channel.send(`⚠️ ${message.author}, je n\'ai pas les permissions nécessaires pour faire cette commande. \nJ\'ai besoin des permissions suivantes: ${client.formatPermissions(command.help.botPerms.map(perm => `\`${perm}\``).join(', '))}`)
         }
     }
 
