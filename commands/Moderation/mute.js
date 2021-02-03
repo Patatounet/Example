@@ -29,7 +29,7 @@ module.exports.run = async (client, message, args, data) => {
                 name: "Muted",
                 color: "#000000",
                 permissions: [],
-                position: message.member.roles.highest.position - 1,
+                position: message.guild.member(client.user).roles.highest.position,
                 mentionnable: false
             }
         }).then(async role => {
