@@ -38,7 +38,7 @@ module.exports.run = async (client, message, args, data) => {
                 { name: "Utilisation", value: command.help.usage ? data.prefix + command.help.name + " " + command.help.usage : data.prefix + command.help.name, inline: false },
                 { name: "Aliases", value: command.help.aliases.length > 1 ? command.help.aliases.map(a => "`" + a + "`").join(', ') : "Aucun alias", inline: false },
                 { name: "Cooldown", value: command.help.cooldown + "s", inline: false },
-                { name: "Permissions", value: `**Bot**: ${command.help.botPerms.length > 0 ? command.help.botPerms.map(p => "`" + p + "`").join(", ") : "Pas de permissions requise"} \n**Membres**: ${command.help.memberPerms.length > 0 ? command.help.memberPerms.map(p => "`" + p + "`").join(', ') : "Aucune permissions requise"}`, inline: false },
+                { name: "Permissions", value: `**Bot**: ${command.help.botPerms.length > 0 ? client.formatPermissions(command.help.botPerms.map(p => "`" + p + "`").join(", ")) : "Pas de permissions requise"} \n**Membres**: ${command.help.memberPerms.length > 0 ? client.formatPermissions(command.help.memberPerms.map(p => "`" + p + "`").join(', ')) : "Aucune permissions requise"}`, inline: false },
             )
             .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
         message.channel.send(helpEmbed2)
