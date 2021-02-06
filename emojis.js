@@ -12,6 +12,7 @@ module.exports = {
     categories: {
         Administration: "🗃️",
         Config: "🛠️",
+        Fun: "🥲",
         General: "🌐",
         Giveaways: "🎉",
         Moderation: "⚒️",
