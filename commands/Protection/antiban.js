@@ -1,20 +1,19 @@
 module.exports.run = async (client, message, args, data) => {
-    message.channel.send('Cette commande n\'est pas disponible pour le moment. Pour être au courant des nouveautés du bot, rendez-vous sur notre support via la commande `' + data.prefix + 'support`.');
-    // if(data.plugins.protection.antiban === false) {
-    //     data.plugins.protection.antiban = true;
+    if(data.plugins.protection.antiban === false) {
+        data.plugins.protection.antiban = true;
 
-    //     data.markModified("plugins.protection.antiban");
-    //     data.save();
+        data.markModified("plugins.protection.antiban");
+        data.save();
 
-    //     message.channel.send('✅ **Antiban activé avec succès**');
-    // } else if(data.plugins.protection.antiban === true) {
-    //     data.plugins.protection.antiban = false;
+        message.channel.send('✅ **Antiban activé avec succès**');
+    } else if(data.plugins.protection.antiban === true) {
+        data.plugins.protection.antiban = false;
 
-    //     data.markModified("plugins.protection.antiban");
-    //     data.save();
+        data.markModified("plugins.protection.antiban");
+        data.save();
 
-    //     message.channel.send('✅ **Antiban désactivé avec succès**');
-    // }
+        message.channel.send('✅ **Antiban désactivé avec succès**');
+    }
 }
 
 module.exports.help = {
