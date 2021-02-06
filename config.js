@@ -3,6 +3,7 @@ module.exports = {
         id: "",
         logs: ""
     },
+    blagueApiToken: ``,
     prefix: "?",
     defaultsSettings: {
         lang: "fr",
