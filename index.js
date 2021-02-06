@@ -10,6 +10,7 @@ require('dotenv').config();
 require('./util/functions')(client);
 client.config = require('./config');
 client.mongoose = require('mongoose');
+client.games = [];
 ['commands', 'cooldowns'].forEach(x => client[x] = new Discord.Collection());
 
 client.giveawaysManager = new GiveawaysManager(client, {
