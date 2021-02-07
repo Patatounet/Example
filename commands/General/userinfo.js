@@ -23,7 +23,7 @@ module.exports.run = async (client, message, args) => {
     else clientStatus = "Inconnu";
 
     const roles = member.roles.cache.sort((a, b) => b.position - a.position).filter(role => role.id !== message.guild.roles.everyone.id).map(role => role.toString());
-    const reste = roles.splice(0, 29).join(", ");
+    let reste = roles.splice(0, 29).join(", ");
 
     if(reste.length > 300) reste = reste.substr(0, 310) + " et plus...";
 
