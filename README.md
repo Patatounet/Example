@@ -1,4 +1,4 @@
-<img align=left src="https://i.imgur.com/ZE3QXBIh.jpg" width="150" alt="RainsBot" />
+<img align=left src="https://i.imgur.com/PoB7SMxh.jpg" width="150" alt="RainsBot" />
 
 <a href="https://discord.gg/SSWQamBCFE"><img src="https://img.shields.io/discord/787006944974995476?color=7289da&logo=discord&logoColor=white" alt="Serveur support" /></a>
 <a href="https://github.com/COCO150/RainsBot"><img src="https://img.shields.io/github/stars/COCO150/RainsBot?style=social" alt="GitHub" /></a>
@@ -55,6 +55,7 @@ Si vous souhaitez tout réinitialiser la config, faites `?reset-config` :(
 ```js
 🗃️ Administration [4]: deletechannel, deleterole, setafkchannel, slowmode
 🛠️ Config [10]: autorole, config, enable, goodbye, logschannel, et plus...
+😂 Fun [10]: 8ball, ascii, morpion, quiz, et plus...
 🌐 General [14]: avatar, botinfo, embed, emoji-info, github, et plus...
 🎉 Giveaways [3]: start, end, reroll
 ⚒️ Moderation [11]: ban, clear, clearusermsg, deafen, kick, et plus...
