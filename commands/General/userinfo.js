@@ -65,42 +65,36 @@ module.exports.run = async (client, message, args) => {
         }
     }
 
-    const embed = {
-        color: client.config.embed.color,
-        author: {
-            name: user.tag,
-            icon_url: user.displayAvatarURL()
-        },
-        thumbnail: {
-            url: user.displayAvatarURL({ dynamic: true })
-        },
-        fields: [
-            {
-                name: "__Infos utilisateur__",
-                value: `⭐ **Nom d'utilisateur :** ${user.username}
-                    🤖 **Bot ? :** ${user.bot ? "Oui" : "Non"}
-                    🔋 **ID utilisateur :** ${user.id}`
+    message.channel.send({ 
+        embed: {
+            color: client.config.embed.color,
+            author: {
+                name: user.tag,
+                icon_url: user.displayAvatarURL()
             },
-            {
-                name: "__Statut utilisateur__",
-                value: `📱 **Activité :** ${toDisplay.length > 1 ? toDisplay : "Aucune activité en cours"}
-                    🖥️ **Client :** ${clientStatus}
-                    📡 **Status :** ${userStatus}`
+            thumbnail: {
+                url: user.displayAvatarURL({ dynamic: true })
             },
-            {
-                name: "__Infos du membre sur le serveur__",
-                value: `⏳ **Création du compte :** ${moment(user.createdAt).locale('fr').format('llll')}
-                    📥 **Rejoint le :** ${moment(member.joinedAt).locale('fr').format('llll')}
-                    🎭 **Rôles :** ${member.roles.cache.size > 1 ? reste : "Aucun rôle"}`
+            fields: [
+                {
+                    name: "__Infos utilisateur__",
+                    value: `⭐ **Nom d'utilisateur :** ${user.username}\n🤖 **Bot ? :** ${user.bot ? "Oui" : "Non"}\n🔋 **ID utilisateur :** ${user.id}`
+                },
+                {
+                    name: "__Statut utilisateur__",
+                    value: `📱 **Activité :** ${toDisplay.length > 1 ? toDisplay : "Aucune activité en cours"}\n🖥️ **Client :** ${clientStatus}\n📡 **Status :** ${userStatus}`
+                },
+                {
+                    name: "__Infos du membre sur le serveur__",
+                    value: `⏳ **Création du compte :** ${moment(user.createdAt).locale('fr').format('llll')}\n📥 **Rejoint le :** ${moment(member.joinedAt).locale('fr').format('llll')}\n🎭 **Rôles :** ${member.roles.cache.size > 1 ? reste : "Aucun rôle"}`
+                }
+            ],
+            footer: {
+                text: client.config.embed.footer,
+                icon_url: client.user.displayAvatarURL()
             }
-        ],
-        footer: {
-            text: client.config.embed.footer,
-            icon_url: client.user.displayAvatarURL()
-        }
-    }
-
-    message.channel.send({ embed: embed });
+        } 
+    });
 }
 
 module.exports.help = {
