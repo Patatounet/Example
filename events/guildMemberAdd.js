@@ -1,5 +1,6 @@
 module.exports = async (client, member) => {
     const data = await client.getGuild(member.guild);
+    if(!data) return;
 
     if(data.plugins.protection.raidmode === true) {
         member.send("**⚠️ Le Raidmode est activé sur le serveur " + member.guild.name + ", vous avez donc été kick de celui-ci! ⚠️** \nSi vous pensez que c'est une erreur, contactez le propriétaire du serveur.").catch(() => {});
