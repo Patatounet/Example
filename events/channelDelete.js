@@ -4,6 +4,7 @@ module.exports = async (client, channel) => {
     if(channel.type == "dm") return;
 
     const data = await client.getGuild(channel.guild);
+    if(!data) return;
 
     if(data.plugins.logs.enabled) {
         if(data.plugins.logs.channel) {
