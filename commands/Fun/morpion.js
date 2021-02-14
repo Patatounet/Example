@@ -6,13 +6,21 @@ module.exports.run = async (client, message, args) => {
 
     if(!user || !message.guild.member(user) || user.bot || (user.id === message.author.id)) return message.channel.send('⚠️ Cet utilisateur n\'existe pas !');
 
-    const existingGame = Game.findGameByUsers(client, message.author, user);
-    if(existingGame) return message.channel.send('⚠️ Vous ou votre adversaire jouez déjà à une partie !');
-
     let m = await message.channel.send(`${user}, **${message.author.tag}** veut jouer au morpion avec vous. \nRépondez par oui ou non pour accepter ou refuser.`)
 
     let embed;
     let gMsg;
+    const emojis = [
+        { "1": "1️⃣" },
+        { "2": "2️⃣" },
+        { "3": "3️⃣" },
+        { "4": "4️⃣" },
+        { "5": "5️⃣" },
+        { "6": "6️⃣" },
+        { "7": "7️⃣" },
+        { "8": "8️⃣" },
+        { "9": "9️⃣" }
+    ];
 
     const filter = m => m.author.id === user.id;
     const col = new MessageCollector(message.channel, filter, {
@@ -22,6 +30,16 @@ module.exports.run = async (client, message, args) => {
 
     col.on("collect", async (tmsg) => {
         if(tmsg.content.toLowerCase() === "oui") {
+            const existingGame = Game.findGameByUsers(client, message.author, user);
+            if(existingGame) {
+                col.stop(true);
+
+                m.delete().catch(() => {});
+                tmsg.delete().catch(() => {});
+
+                return message.channel.send('⚠️ Vous ou votre adversaire jouez déjà à une partie !');
+            }
+
             col.stop(true);
 
             m.delete().catch(() => {});
@@ -54,15 +72,11 @@ module.exports.run = async (client, message, args) => {
             }, 20000));
 
             collector.on("collect", async (toPlay) => {
-                let game;
-                client.games.forEach(g => {
-                    if(g.players.includes(message.author)) return game = g;
-                });
+                let game = Game.findGameByUsers(client, message.author, user);
 
                 if(!game) {
                     collector.stop(true);
                     timeouts.forEach(timeout => client.clearTimeout(timeout));
-                    embed.delete().catch(() => {});
                     return;
                 }
 
@@ -78,8 +92,11 @@ module.exports.run = async (client, message, args) => {
                     return message.channel.send('⚠️ Merci de jouer sur une case entre 1 et 9 !').then(m => m.delete({ timeout: 3000 }).catch(() => {}));
                 }
 
-                if(game.board[0][parseInt(toPlay.content) - 1]) return message.channel.send('⚠️ Cette case est déjà occupée !');
-
+                if(!gMsg.content.includes(emojis[parseInt(toPlay.content) - 1][toPlay.content])) {
+                    message.channel.send('⚠️ Cette case est déjà occupée !').then(m => m.delete({ timeout: 3000 }));
+                    return toPlay.delete();
+                }
+                
                 removeTimeouts();
 
                 async function change() {
@@ -93,24 +110,13 @@ module.exports.run = async (client, message, args) => {
                         }, 30000));
                     }, 20000));
 
-                    const emojis = [
-                        { "1": "1️⃣" },
-                        { "2": "2️⃣" },
-                        { "3": "3️⃣" },
-                        { "4": "4️⃣" },
-                        { "5": "5️⃣" },
-                        { "6": "6️⃣" },
-                        { "7": "7️⃣" },
-                        { "8": "8️⃣" },
-                        { "9": "9️⃣" }
-                    ];
-
                     await gMsg.edit(gMsg.content.replace(emojis[parseInt(toPlay.content) - 1][toPlay.content], Game.getPlayerSymbol(currentPlayer)));
 
                     const result = game.checkWin(game.board);
                     if(result) {
                         timeouts.forEach(timeout => client.clearTimeout(timeout));
                         collector.stop(true);
+                        toPlay.delete();
 
                         if(result === "égalité") {
                             game.delete(client);
@@ -260,7 +266,7 @@ module.exports.help = {
     category: "Fun",
     description: "Jouer au morpillon !",
     usage: "<membre>",
-    cooldown: 5,
+    cooldown: 30,
     memberPerms: [],
     botPerms: ["MANAGE_MESSAGES"],
     args: true
