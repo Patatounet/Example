@@ -3,6 +3,7 @@ const moment = require("moment");
 
 module.exports = async (client, role) => {
     const data = await client.getGuild(role.guild);
+    if(!data) return;
 
     if(data.plugins.logs.enabled) {
         if(data.plugins.logs.channel) {
