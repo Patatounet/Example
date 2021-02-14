@@ -1,5 +1,6 @@
 module.exports = async (client, member) => {
     const data = await client.getGuild(member.guild);
+    if(!data) return;
 
     if(!data.plugins.goodbye.enabled) return;
 
