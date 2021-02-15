@@ -1,13 +1,19 @@
 module.exports = client => {
-    function randomStatus() {
-        const status = client.config.status
-        const rstatus = Math.floor(Math.random() * status.length);
-        const toDisplay = status[rstatus].name.replace("{serversCount}", client.guilds.cache.size).replace("{usersCount}", client.getAllUsers());
+    async function setActivity() {
+        client.user.setActivity(client.config.status.name.replace("{serversCount}", client.guilds.cache.size).replace("{usersCount}", client.getAllUsers()), { type: client.config.status.type });
+    };
 
-        client.user.setActivity(toDisplay, { type: status[rstatus].type });
-    }
-    setInterval(randomStatus, 30000);
+    setActivity().then(() => {
+        setInterval(() => {
+            setActivity();
+        }, 60000);
+    });
 
-    console.log(`Connecté avec succès sur ${client.user.tag}`);
-    client.channels.cache.get(client.config.support.logs).send('✅ **Le bot est connecté!**');
+    client.channels.fetch(client.config.support.logs).then(channel => {
+        channel.send("✅ **Le bot est connecté!**");
+        console.log(`Connecté avec succès sur ${client.user.tag}`);
+    }).catch(err => {
+        console.log(`Unable to send messages to the log channel :`, err);
+        process.exit(1);
+    });
 }
