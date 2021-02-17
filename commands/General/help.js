@@ -3,28 +3,31 @@ const { MessageEmbed } = require('discord.js');
 
 module.exports.run = async (client, message, args, data) => {
     if(!args.length) {
-    const categories = [];
-    const commands = client.commands;
+        const categories = [];
+        const commands = client.commands;
 
-    commands.forEach(command => {
-        if(!categories.includes(command.help.category)){
-            if(command.help.category === "Owner" && message.author.id !== client.config.owner.id) return;
+        commands.forEach(command => {
+            if(!categories.includes(command.help.category)){
+                if(command.help.category === "Owner" && message.author.id !== client.config.owner.id) return;
 
-            categories.push(command.help.category);
-        }
-    })
+                categories.push(command.help.category);
+            }
+        });
 
-    const helpEmbed = new MessageEmbed()
-        .setColor(client.config.embed.color)
-        .setTitle(`📚 - Commandes de ${client.user.username}`)
-        .setDescription(`Faites **${data.prefix}help [commande]** pour afficher des informations sur une commande ! \n\u200b`)
-        .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
-    categories.sort().forEach(cat => {
-        const tCommands = commands.filter(cmd => cmd.help.category === cat);
-        helpEmbed.addField(emojis.categories[cat] + "  " + cat + " - " + tCommands.size, tCommands.map(cmd => "`" + cmd.help.name + "`").join(', '));
-    })    
+        const helpEmbed = new MessageEmbed()
+            .setColor(client.config.embed.color)
+            .setTitle(`📚 - Commandes de ${client.user.username}`)
+            .setDescription(`Faites **${data.prefix}help [commande]** pour afficher des informations sur une commande ! \n\u200b`)
+            .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
 
-    return message.channel.send(helpEmbed)
+        categories.sort().forEach(cat => {
+            const tCommands = commands.filter(cmd => cmd.help.category === cat);
+            helpEmbed.addField(emojis.categories[cat] + "  " + cat + " - " + tCommands.size, tCommands.map(cmd => "`" + cmd.help.name + "`").join(', '));
+        });
+
+        helpEmbed.addField("🔗  Liens", "[Inviter le bot](https://discord.com/oauth2/authorize?client_id=781911855299035217&scope=bot&permissions=2147483647) • [Voter pour le bot](https://top.gg/bot/781911855299035217) • [Serveur support](https://discord.gg/SSWQamBCFE)");
+
+        return message.channel.send(helpEmbed);
     } else {
         const command = client.commands.get(args[0].toLowerCase()) || client.commands.find(cmd => cmd.help.aliases && cmd.help.aliases.includes(args[0]));
         if(!command) return message.channel.send(`⚠️ Cette commande n'existe pas, vérifiez l'orthographe et réessayez.`)
