@@ -7,14 +7,14 @@ module.exports.run = async (client, message, args, data) => {
     await message.delete();
 
     let messages = await message.channel.messages.fetch({
-        limit: Math.min(toDelete, 100),
+        limit: parseInt(Math.min(toDelete, 100)),
         before: message.id
     })
     
     if(messages.length == 1) {
         await messages[0].delete().catch(() => {});
     } else {
-    await message.channel.bulkDelete(messages, true).catch(err => {
+        await message.channel.bulkDelete(messages, true).catch(err => {
         if(err.code == "50034") return message.channel.send(`⚠️ Impossible de supprimer des messages vieux de plus de 2 semaines.`);
         else {
             if(err.code != "10008");
@@ -22,13 +22,13 @@ module.exports.run = async (client, message, args, data) => {
             return message.channel.send(`⚠️ Une erreur est survenue, veuillez réessayer. \n\`\`\`js\n${err}\n\`\`\``);
         }
     })
-        message.channel.send(`✅ ${toDelete} message supprimés.`);
+        message.channel.send(`✅ ${parseInt(toDelete)} message supprimés.`);
 
         if(data.plugins.logs.enabled) {
             if(message.guild.channels.cache.get(data.plugins.logs.channel)) {
                 const embed = new MessageEmbed()
                     .setColor(client.config.embed.color)
-                    .setDescription(`${message.author} a supprimé ${toDelete} messages dans ${message.channel}`)
+                    .setDescription(`${message.author} a supprimé ${parseInt(toDelete)} messages dans ${message.channel}`)
                     .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
                 message.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
             }
