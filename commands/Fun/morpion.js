@@ -1,4 +1,4 @@
-const Game = require('../../models/Morpion');
+const Morpion = require('../../models/Morpion');
 const { MessageCollector } = require('discord.js');
 
 module.exports.run = async (client, message, args) => {
@@ -30,7 +30,7 @@ module.exports.run = async (client, message, args) => {
 
     col.on("collect", async (tmsg) => {
         if(tmsg.content.toLowerCase() === "oui") {
-            const existingGame = Game.findGameByUsers(client, message.author, user);
+            const existingGame = Morpion.findGameByUsers(client, message.author, user);
             if(existingGame) {
                 col.stop(true);
 
@@ -54,7 +54,7 @@ module.exports.run = async (client, message, args) => {
                 }
             });
 
-            client.games.push(new Game(message.author, user));
+            client.games.push(new Morpion(message.author, user));
 
             const filter1 = m => m.author.id === message.author.id || m.author.id === user.id;
             const collector = new MessageCollector(message.channel, filter1);
@@ -66,13 +66,13 @@ module.exports.run = async (client, message, args) => {
 
                 timeouts.push(client.setTimeout(() => {
                     message.channel.send(`**${message.author.tag}** a déclaré forfait, ${user} remporte la victoire ! 🎉`);
-                    Game.findGameByUsers(client, message.author, user).delete(client);
+                    Morpion.findGameByUsers(client, message.author, user).delete(client);
                     timeouts.forEach(timeout => client.clearTimeout(timeout));
                 }, 30000));
             }, 20000));
 
             collector.on("collect", async (toPlay) => {
-                let game = Game.findGameByUsers(client, message.author, user);
+                let game = Morpion.findGameByUsers(client, message.author, user);
 
                 if(!game) {
                     collector.stop(true);
@@ -110,7 +110,7 @@ module.exports.run = async (client, message, args) => {
                         }, 30000));
                     }, 20000));
 
-                    await gMsg.edit(gMsg.content.replace(emojis[parseInt(toPlay.content) - 1][toPlay.content], Game.getPlayerSymbol(currentPlayer)));
+                    await gMsg.edit(gMsg.content.replace(emojis[parseInt(toPlay.content) - 1][toPlay.content], Morpion.getPlayerSymbol(currentPlayer)));
 
                     const result = game.checkWin(game.board);
                     if(result) {
@@ -152,99 +152,99 @@ module.exports.run = async (client, message, args) => {
                     case "1": {
                         if(currentPlayer === 1) {
                             change();
-                            game.board[0][0] = Game.getPlayerSymbol(currentPlayer);
+                            game.board[0][0] = Morpion.getPlayerSymbol(currentPlayer);
                             break;
                         } else {
                             change();
-                            game.board[0][0] = Game.getPlayerSymbol(currentPlayer);
+                            game.board[0][0] = Morpion.getPlayerSymbol(currentPlayer);
                             break;
                         }
                     }
                     case "2": {
                         if(currentPlayer === 1) {
                             change();
-                            game.board[0][1] = Game.getPlayerSymbol(currentPlayer);
+                            game.board[0][1] = Morpion.getPlayerSymbol(currentPlayer);
                             break;
                         } else {
                             change();
-                            game.board[0][1] = Game.getPlayerSymbol(currentPlayer);
+                            game.board[0][1] = Morpion.getPlayerSymbol(currentPlayer);
                             break;
                         }
                     }
                     case "3": {
                         if(currentPlayer === 1) {
                             change();
-                            game.board[0][2] = Game.getPlayerSymbol(currentPlayer);
+                            game.board[0][2] = Morpion.getPlayerSymbol(currentPlayer);
                             break;
                         } else {
                             change();
-                            game.board[0][2] = Game.getPlayerSymbol(currentPlayer);;
+                            game.board[0][2] = Morpion.getPlayerSymbol(currentPlayer);;
                             break;
                         }
                     }
                     case "4": {
                         if(currentPlayer === 1) {
                             change();
-                            game.board[1][0] = Game.getPlayerSymbol(currentPlayer);
+                            game.board[1][0] = Morpion.getPlayerSymbol(currentPlayer);
                             break;
                         } else {
                             change();
-                            game.board[1][0] = Game.getPlayerSymbol(currentPlayer);
+                            game.board[1][0] = Morpion.getPlayerSymbol(currentPlayer);
                             break;
                         }
                     }
                     case "5": {
                         if(currentPlayer === 1) {
                             change();
-                            game.board[1][1] = Game.getPlayerSymbol(currentPlayer);
+                            game.board[1][1] = Morpion.getPlayerSymbol(currentPlayer);
                             break;
                         } else {
                             change();
-                            game.board[1][1] = Game.getPlayerSymbol(currentPlayer);
+                            game.board[1][1] = Morpion.getPlayerSymbol(currentPlayer);
                             break;
                         }
                     }
                     case "6": {
                         if(currentPlayer === 1) {
                             change();
-                            game.board[1][2] = Game.getPlayerSymbol(currentPlayer);
+                            game.board[1][2] = Morpion.getPlayerSymbol(currentPlayer);
                             break;
                         } else {
                             change();
-                            game.board[1][2] = Game.getPlayerSymbol(currentPlayer);
+                            game.board[1][2] = Morpion.getPlayerSymbol(currentPlayer);
                             break;
                         }
                     }
                     case "7": {
                         if(currentPlayer === 1) {
                             change();
-                            game.board[2][0] = Game.getPlayerSymbol(currentPlayer);
+                            game.board[2][0] = Morpion.getPlayerSymbol(currentPlayer);
                             break;
                         } else {
                             change();
-                            game.board[2][0] = Game.getPlayerSymbol(currentPlayer);
+                            game.board[2][0] = Morpion.getPlayerSymbol(currentPlayer);
                             break;
                         }
                     }
                     case "8": {
                         if(currentPlayer === 1) {
                             change();
-                            game.board[2][1] = Game.getPlayerSymbol(currentPlayer);
+                            game.board[2][1] = Morpion.getPlayerSymbol(currentPlayer);
                             break;
                         } else {
                             change();
-                            game.board[2][1] = Game.getPlayerSymbol(currentPlayer);
+                            game.board[2][1] = Morpion.getPlayerSymbol(currentPlayer);
                             break;
                         }
                     }
                     case "9": {
                         if(currentPlayer === 1) {
                             change();
-                            game.board[2][2] = Game.getPlayerSymbol(currentPlayer);
+                            game.board[2][2] = Morpion.getPlayerSymbol(currentPlayer);
                             break;
                         } else {
                             change();
-                            game.board[2][2] = Game.getPlayerSymbol(currentPlayer);
+                            game.board[2][2] = Morpion.getPlayerSymbol(currentPlayer);
                         }
                     }
                 }
