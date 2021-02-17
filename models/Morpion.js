@@ -1,22 +1,14 @@
-class Game {
+const Game = require('./Game');
+
+module.exports = class Morpion extends Game {
     constructor(challenger, opponent) {
-        this.currentPlayer = 1;
+        super(challenger, opponent);
+
         this.board = [
             ['', '', ''],
             ['', '', ''],
-            ['', '', ''],
+            ['', '', '']
         ];
-        this.challenger = challenger;
-        this.opponent = opponent;
-        this.players = [challenger, opponent];
-    }
-
-    changeCurrentPlayer() {
-        if(this.currentPlayer === 1) {
-            this.currentPlayer = 2;
-        } else {
-            this.currentPlayer = 1;
-        }
     }
 
     checkWin(board) {
@@ -68,21 +60,4 @@ class Game {
             return '⭕';
         }
     }
-
-    static findGameByUsers(client, user1, user2) {
-        return client.games.find(
-            (game) =>
-                (game.players[0].id === user1.id &&
-                    game.players[1].id === user2.id) ||
-                (game.players[0].id === user2.id &&
-                    game.players[1].id === user1.id)
-        );
-    }
-
-    delete(client) {
-        client.games = client.games.filter((game) => game !== this);
-        return this;
-    }
 }
-
-module.exports = Game;
