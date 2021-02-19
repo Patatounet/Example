@@ -1,4 +1,5 @@
 const Morpion = require('../../models/Morpion');
+const ConnectFour = require('../../models/ConnectFour');
 const { MessageCollector } = require('discord.js');
 
 module.exports.run = async (client, message, args) => {
@@ -30,7 +31,7 @@ module.exports.run = async (client, message, args) => {
 
     col.on("collect", async (tmsg) => {
         if(tmsg.content.toLowerCase() === "oui") {
-            const existingGame = Morpion.findGameByUsers(client, message.author, user);
+            const existingGame = Morpion.findGameByUsers(client, message.author, user) || ConnectFour.findGameByUsers(client, message.author, user);
             if(existingGame) {
                 col.stop(true);
 
