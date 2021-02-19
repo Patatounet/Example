@@ -1,6 +1,7 @@
 module.exports = {
     chargement: "<a:chargement:781955727580594188>",
     facepalm: "<:facepalm:782305364490190858>",
+    black_circle: "<:ile_noir_ce_rond:812266022388105256>",
     online: "<:online:783032922457636904>",
     dnd: "<:dnd:783032948399276134>",
     idle: "<:idle:783032969219932191>",
