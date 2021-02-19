@@ -19,7 +19,7 @@ module.exports = async (client, oldMember, newMember) => {
             
                 const { executor } = fetchGuildAuditLogs.entries.first();
 
-                if(executor.id === newMember.guild.ownerID || executor.id === newMember.id || newMember.id === newMember.guild.ownerID) return;
+                if(executor.id === newMember.guild.ownerID || executor.id === newMember.id || newMember.id === newMember.guild.ownerID || newMember.user.bot) return;
 
                 const oldAdminroles = oldMember.roles.cache.filter(r => r.id !== oldMember.guild.roles.everyone.id).filter(role => role.permissions.toArray().includes('ADMINISTRATOR') || role.permissions.toArray().includes('BAN_MEMBERS') || role.permissions.toArray().includes('KICK_MEMBERS'));
 
@@ -29,13 +29,13 @@ module.exports = async (client, oldMember, newMember) => {
                     newAdminRoles.forEach(async r => {
                         if(!oldAdminroles.map(r => r.id).includes(r.id)) {
                             if(r.position >= newMember.guild.me.roles.highest.position) {
-                                if(data.plugins.logs.enabled && data.plugins.logs.channel) {
+                                if(data.plugins.logs.enabled && newMember.guild.channels.cache.get(data.plugins.logs.channel)) {
                                     return newMember.guild.channels.cache.get(data.plugins.logs.channel).send('L\'antigiverole est activé et un utilisateur a donné un rôle de modérateur/administrateur a un autre, mais je n\'ai pas pu lui enlever car le rôle est placé au dessus de moi!');
                                 }
                             } else {
                                 await newMember.roles.remove(r.id);
 
-                                if(data.plugins.logs.enabled && data.plugins.logs.channel) {
+                                if(data.plugins.logs.enabled && newMember.guild.channels.cache.get(data.plugins.logs.channel)) {
                                     const embed = new MessageEmbed()
                                         .setColor('RED')
                                         .setAuthor(`${executor.username} a tenté de rajouter un rôle de modération a un utilisateur.`)
