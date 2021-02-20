@@ -37,9 +37,9 @@ module.exports.run = async (client, message) => {
             page = page - 1
 
             if(i0 < 0) return;
-            if(!i0 || !i1) return;
+            if(page < 1) return;
 
-            description = `Serveurs: ${client.guilds.cache.size}\n\n` + client.guilds.cache.sort((a, b) => b.memberCount - a.memberCount).map(r => r).map((r, i) => `**${i + 1}** - ${r.name} | ${r.memberCount} Membres`).slice(i0, i1).join("\n");
+            description = `Serveurs: ${client.guilds.cache.size}\n\n` + client.guilds.cache.sort((a, b) => b.memberCount - a.memberCount).map(r => r).map((r, i) => `**${i + 1}** - ${r.name} | ${r.memberCount} Membres (${r.id})`).slice(i0, i1).join("\n");
 
             embed.setTitle(`Page: ${page}/${Math.ceil(client.guilds.cache.size / 10)}`)
                 .setDescription(description);
@@ -54,7 +54,6 @@ module.exports.run = async (client, message) => {
 
             if(i1 > client.guilds.cache.size + 10) return;
             if(i0 < 0) return;
-            if(!i0 || !i1) return;
 
             description = `Serveurs: ${client.guilds.cache.size}\n\n` + client.guilds.cache.sort((a, b) => b.memberCount - a.memberCount).map((r) => r)
             .map((r, i) => `**${i + 1}** - ${r.name} | ${r.memberCount} Membres (${r.id})`).slice(i0, i1).join("\n");
