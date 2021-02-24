@@ -83,7 +83,6 @@ module.exports.run = async (client, message, args) => {
 
                 if(isNaN(translate(reaction.emoji.name))) return;
 
-                // TODO: si la colonne est pleine, enlever la réaction
                 if(game.board[0][translate(reaction.emoji.name) - 1] !== emojis.black_circle) return message.channel.send('⚠️ Cette colonne est pleine !').then(m => m.delete({ timeout: 3000 }));
 
                 removeTimeouts();
@@ -116,7 +115,11 @@ module.exports.run = async (client, message, args) => {
                         }
                     }
 
-                    reaction.users.remove(user1);
+                    if(game.board[0][translate(reaction.emoji.name) - 1] !== emojis.black_circle) {
+                        reaction.remove();
+                    } else {
+                        reaction.users.remove(user1);
+                    }
 
                     embed.edit(embed.embeds[0].setDescription(`La partie a commencée. C'est au tour de ${currentPlayer === 1 ? game.opponent : game.challenger}`))
 
