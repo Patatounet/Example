@@ -11,15 +11,15 @@ module.exports = async (client, message) => {
     }
 
     const data = await client.getGuild(message.guild);
-    if(!data) {  
+    if(!data) {
+        client.emit("guildCreate", message.guild);
+
         const welcomeEmbed = new Discord.MessageEmbed()
             .setColor(client.config.embed.color)
             .setTitle('Merci de m\'avoir ajouté à votre serveur !')
             .setDescription(`@Mentionnez-moi pour avoir de l'aide !`)
             .setFooter(client.config.embed.footer, client.user.displayAvatarURL())
-        message.channel.send(welcomeEmbed);
-
-        return await client.createGuild({ id: message.guild.id });
+        return message.channel.send(welcomeEmbed).catch(() => {});
     }
 
     const p = data.members.map(m => m.id).indexOf(message.member.id);
