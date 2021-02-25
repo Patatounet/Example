@@ -1,6 +1,9 @@
 const { MessageEmbed } = require("discord.js");
 
 module.exports = async (client, guild) => {
+    const data = await client.getGuild(guild);
+    if(!data) await client.createGuild({ id: guild.id });
+
     const newGuildEmbed = new MessageEmbed()
         .setColor('GREEN')
         .setAuthor(guild.name, guild.iconURL({ dynamic: true }))
