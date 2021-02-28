@@ -61,7 +61,7 @@ module.exports.run = async (client, message, args) => {
 
             toDisplay+= userActivity.name;
         } else {
-            toDisplay = `${userActivity.emoji ? userActivity.emoji : ""} ${userActivity.state}`
+            toDisplay = `${userActivity.emoji ? userActivity.emoji : ""} ${userActivity.state ? userActivity.state : ""}`;
         }
     }
 
