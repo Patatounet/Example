@@ -6,7 +6,7 @@ module.exports.run = async (client, message) => {
 
     await fetch('https://www.blagues-api.fr/api/random', {
         headers: {
-            'Authorization': `Bearer ${client.config.blagueApiToken}`
+            'Authorization': `Bearer ${process.env.BLAGUEAPITOKEN}`
         }
     })
     .then(res => res.json())
