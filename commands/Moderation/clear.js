@@ -9,7 +9,7 @@ module.exports.run = async (client, message, args, data) => {
         before: message.id
     });
 
-    await message.delete();
+    await message.delete().catch(() => {});
 
     await message.channel.bulkDelete(messages).then(deletedMessages => {
         let deleted = deletedMessages.size;
