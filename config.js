@@ -1,9 +1,9 @@
 module.exports = {
     support: {
         id: "",
-        logs: ""
+        logs: "",
+        votes: ""
     },
-    blagueApiToken: ``,
     prefix: "?",
     defaultsSettings: {
         lang: "fr",
