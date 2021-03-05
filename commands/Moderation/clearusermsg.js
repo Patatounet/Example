@@ -13,7 +13,7 @@ module.exports.run = async (client, message, args, data) => {
         before: message.id
     })).filter(a => a.author.id === user.id).array();
 
-    messages.length = Math.min(args[1], messages.length);
+    messages.length = Math.min(parseInt(toDelete), messages.length);
 
     if(messages.length === 0) return message.channel.send(`⚠️ Il n'y a aucun message de cet utilisateur a supprimer.`);
 
@@ -34,7 +34,7 @@ module.exports.run = async (client, message, args, data) => {
 
         return message.channel.send(`✅ 1 message supprimé de ${user}.`);
     } else {
-    await message.channel.bulkDelete(messages, true).catch(err => {
+    await message.channel.bulkDelete(messages).catch(err => {
         if(err.code == "50034") return message.channel.send(`⚠️ Impossible de supprimer des messages vieux de plus de 2 semaines.`);
         else {
             if(err.code != "10008");
