@@ -265,7 +265,7 @@ module.exports.help = {
     name: "morpion",
     aliases: ["morpion"],
     category: "Fun",
-    description: "Jouer au morpillon !",
+    description: "Jouer au morpion !",
     usage: "<membre>",
     cooldown: 30,
     memberPerms: [],
