@@ -127,6 +127,18 @@ module.exports.run = async (client, message, args) => {
                     await gMsg.edit(displayNewBoard());
 
                     const result = game.checkWin(ConnectFour.getPlayerSymbol(game.currentPlayer === 1 ? 2 : 1));
+
+                    if(game.board[0].every(c => c !== emojis.black_circle) && !result) {
+                        removeTimeouts();
+                        collector.stop(true);
+                        await reaction.message.reactions.removeAll();
+
+                        embed.delete();
+                        game.delete(client);
+
+                        return message.channel.send(`Partie terminée ! C'est une égalité...`);
+                    }
+
                     if(result) {
                         removeTimeouts();
                         collector.stop(true);
@@ -135,7 +147,7 @@ module.exports.run = async (client, message, args) => {
                         embed.delete();
                         game.delete(client);
 
-                        message.channel.send(`Partie terminée ! ${user1} a gagné la partie ! 🎉`);
+                        return message.channel.send(`Partie terminée ! ${user1} a gagné la partie ! 🎉`);
                     }
                 }
 
@@ -161,7 +173,7 @@ module.exports.run = async (client, message, args) => {
                 }
 
                 function displayNewBoard() {
-                    return `${reactions.toString().replace(/,/g, "")}\n\n${displayBoard()}`;
+                    return `${reactions.join("")}\n\n${displayBoard()}`;
 
                     function displayBoard() {
                         let message = "";
