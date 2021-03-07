@@ -8,6 +8,7 @@ module.exports.run = (client, message) => {
     message.channel.send(quiz.question).then(() => {
         message.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] })
 		.then(collected => {
+			if(collected.first().author.bot) return;
 			message.channel.send(`${collected.first().author} a eu la bonne réponse !`);
 		})
 		.catch(() => {
