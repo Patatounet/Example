@@ -24,7 +24,7 @@ module.exports = class RainsBot extends Client {
         this.commands = new Collection();
         this.cooldowns = new Collection();
         this.giveawaysManager = new GiveawaysManager(this, {
-            storage: __dirname + "giveaways.json",
+            storage: "../giveaways.json",
             updateCountdownEvery: 10000,
             default: {
                 botsCanWin: false,
@@ -82,7 +82,7 @@ module.exports = class RainsBot extends Client {
 
         // Autopost stats to Top.gg
         AutoPoster(process.env.TOPGGTOKEN, this);
-		console.log('Posted stats to Top.gg!');
+        console.log('Posted stats to Top.gg!');
 
         // Send message and DM when a user votes for the bot
         app.post('/dblwebhook', webhook.middleware(), (req, res) => {
@@ -107,7 +107,7 @@ module.exports = class RainsBot extends Client {
             user.send('Merci d\'avoir voté pour moi ! Des récompenses seront disponibles plus tard, rejoignez notre support via la commande `?support` pour rester à l\'affut !').catch(() => {});
         });
         
-        app.listen(25568);
+        app.listen(80);
     }
 
     async createGuild(guild) {
@@ -122,7 +122,7 @@ module.exports = class RainsBot extends Client {
         return null;
     }
 
-    async updateGuild(guild) {
+    async updateGuild(guild, data = {}) {
         let data_ = await this.getGuild(guild);
         if(typeof data_ !== "object") data_ = {};
         for (const key in data) {
