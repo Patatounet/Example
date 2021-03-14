@@ -7,6 +7,8 @@ module.exports.run = async (client, message, args, data) => {
 
     if(user.id == message.author.id) return message.channel.send(`⚠️ Vous ne pouvez pas vous bannir vous même ${emojis.facepalm}`);
 
+    if(user.id == client.user.id) return message.channel.send(`nop xd`);
+
     const reason = (args.slice(1).join(" ") || "Pas de raison spécifiée");
 
     const member = message.guild.member(user);
@@ -19,12 +21,13 @@ module.exports.run = async (client, message, args, data) => {
 
     if(!member.bannable) return message.channel.send(`⚠️ Je n'ai pas les permissions suffisantes pour bannir ce membre, vérifiez que mon rôle est au dessus du membre à bannir, et réessayez.`);
 
-    message.guild.member(user).ban({ reason: reason }).catch(err => {
+    message.guild.member(user).ban({ reason: reason }).then(() => {
+        user.send(`Vous avez été banni du serveur ${message.guild.name} par ${message.author}. Raison: **${reason}**`);
+        message.channel.send(`✅ ${user} s'est fait bannir par ${message.author} pour la raison suivante: **${reason}**`);
+    }).catch(err => {
         console.log(err);
         message.channel.send(`⚠️ Une erreur est survenue, veuillez réessayer. \n\`\`\`js\n${err}\n\`\`\``);
-    })
-
-    message.channel.send(`✅ ${user} s'est fait bannir par ${message.author} pour la raison suivante: **${reason}**`);
+    });
 }
 
 module.exports.help = {
