@@ -1,7 +1,9 @@
 const { GiveawaysManager } = require('discord-giveaways');
 const { Client, Collection } = require('discord.js');
 const { readdirSync, readdir } = require('fs');
+const { loadImage, createCanvas } = require('canvas');
 const Guild = require('../models/Guild');
+const User = require('../models/User');
 const mongoose = require('mongoose');
 require('dotenv').config();
 const sbl = require('@shadowlist/sblapi');
@@ -10,7 +12,7 @@ const Topgg = require('@top-gg/sdk');
 const AutoPoster = require('topgg-autoposter');
 const express = require('express');
 const app = express();
-const webhook = new Topgg.Webhook(process.env.TOPGGTOKEN);
+const webhook = new Topgg.Webhook(process.env.TOPGGAUTH);
 
 module.exports = class RainsBot extends Client {
     constructor() {
@@ -81,14 +83,22 @@ module.exports = class RainsBot extends Client {
         sblClient.postServers(this.guilds.cache.size);
 
         // Autopost stats to Top.gg
-        AutoPoster(process.env.TOPGGTOKEN, this);
+        const ap = AutoPoster(process.env.TOPGGTOKEN, this);
         console.log('Posted stats to Top.gg!');
 
         // Send message and DM when a user votes for the bot
-        app.post('/dblwebhook', webhook.middleware(), (req, res) => {
+        app.post('/dblwebhook', webhook.middleware(), async (req, res) => {
             const user = this.users.cache.get(req.vote.user);
             if(!user) return this.channels.cache.get(this.config.support.votes).send("Impossible de déterminer qui vient de voter pour moi.");
-        
+
+            const dbUser = await this.findOrCreateUser(user);
+            if(dbUser) {
+                dbUser.bank = dbUser.bank + 10000;
+
+                dbUser.markModified("bank");
+                dbUser.save();
+            }
+
             this.channels.cache.get(this.config.support.votes).send({
                 embed: {
                     color: this.config.embed.color,
@@ -103,11 +113,56 @@ module.exports = class RainsBot extends Client {
                     }
                 }
             });
-        
-            user.send('Merci d\'avoir voté pour moi ! Des récompenses seront disponibles plus tard, rejoignez notre support via la commande `?support` pour rester à l\'affut !').catch(() => {});
+
+            user.send('Merci d\'avoir voté pour moi ! 10 000$ ont été rajoutés à votre compte en banque.').catch(() => {});
         });
-        
-        app.listen(80);
+
+    	app.listen(80);
+
+        // check for all unmutes
+        setInterval(async () => {
+            const allUnmutedUser = await User.find({ tempmutes: { $elemMatch: { endsAt: { $lt: Date.now() } } } });
+            if(!allUnmutedUser || allUnmutedUser?.length === 0) return;
+
+            allUnmutedUser.forEach(async (user) => {
+                for (let i = 0; i < user.tempmutes.length; i++) {
+                    const mute = user.tempmutes[i];
+
+                    user.tempmutes = user.tempmutes.filter(m => m.guildID !== mute.guildID);
+                    await user.save();
+
+                    const guild = this.guilds.cache.get(mute.guildID);
+                    if(!guild || !guild?.available) return;
+                    if(!guild.me.hasPermission("MANAGE_ROLES")) return;
+
+                    const data = await this.getGuild(guild);
+                    const member = guild.members.cache.get(user.id);
+                    if(!member || !data) return;
+
+                    if(member.roles.cache.has(data.muterole)) {
+                        member.roles.remove(data.muterole).then(() => {
+                            member.send(`Vous avez été unmute du serveur ${guild.name}. Raison: **Automatic unmute**`).catch(() => {});
+                        }).catch(() => {});
+                    }
+
+                    if(data.plugins.logs.enabled) {
+                        const channel = guild.channels.resolve(data.plugins.logs.channel);
+                        if(channel) {
+                            channel.send({
+                                embed: {
+                                    color: 'ORANGE',
+                                    description: `L'utilisateur **${this.users.cache.get(user.id).tag}** s'est fait unmute. \nRaison: **Automatic unmute**`,
+                                    footer: {
+                                        text: this.config.embed.footer,
+                                        icon_url: this.user.displayAvatarURL()
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+        }, 10000);
     }
 
     async createGuild(guild) {
@@ -140,7 +195,7 @@ module.exports = class RainsBot extends Client {
             }
         });
 
-        return String(size).replace(/(.)(?=(\d{3})+$)/g, '$1 ');
+        return this.formatNumber(size);
     }
 
     formatPermissions(content) {
@@ -179,5 +234,92 @@ module.exports = class RainsBot extends Client {
             .replace("MANAGE_WEBHOOKS", "Gérer les webhooks");
 
         return content;
+    }
+
+    formatNumber(number) {
+        return String(number).replace(/(.)(?=(\d{3})+$)/g, '$1 ');
+    }
+
+    async updateUserLevel(user, guild, options = {}) {
+        await Guild.updateOne({
+            id: guild.id, "members.id": user.id
+        },
+        {
+            $set: options
+        });
+    }
+
+    async findOrCreateUser(user) {
+        if(user.bot) return;
+
+        const data = await User.findOne({ id: user.id });
+        if(data) return data;
+        else {
+            const merged = Object.assign({ _id: mongoose.Types.ObjectId() }, user);
+            const createUser = await new User(merged);
+            createUser.save();
+        }
+    }
+
+    async generateRankcard(member, userData, rankcard = {}) {
+        const canvas = createCanvas(1000, 333);
+        const ctx = canvas.getContext("2d");
+
+        ctx.fillStyle = "#23272a";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.beginPath();
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "#ffffff";
+        ctx.globalAlpha = 0.2;
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(180, 216, 770, 65);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.strokeRect(180, 216, 770, 65);
+        ctx.stroke();
+
+        ctx.fillStyle = rankcard.progress_bar_color;
+        ctx.globalAlpha = 0.6;
+        ctx.fillRect(180, 216, ((100 / (getTotalExpToLevelUp(userData.level))) * getCurrentLevelExp(userData.level, userData.exp)) * 7.7, 65);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 30px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(`${getCurrentLevelExp(userData.level, userData.exp)} / ${getTotalExpToLevelUp(userData.level)} XP`, 600, 260);
+
+        ctx.fillStyle = rankcard.text_color; 
+        ctx.font = "50px Arial";
+        ctx.textAlign = "left";
+        ctx.fillText(member.user.tag, 380, 90);
+
+        ctx.font = "45px Arial";
+        ctx.fillText(`Level : ${userData.level}`, 310, 190);
+        ctx.fillText(`Total exp : ${userData.exp}`, 580, 190);
+
+        ctx.arc(170, 160, 120, 0, Math.PI * 2, true);
+        ctx.lineWidth = 6;
+        ctx.strokeStyle = rankcard.avatar_color;
+        ctx.stroke();
+        ctx.closePath();
+        ctx.clip();
+        ctx.drawImage(await loadImage(member.user.displayAvatarURL({ format: "png" })), 40, 40, 250, 250);
+
+        return canvas.toBuffer();
+
+        function getTotalExpToLevelUp(level) {
+            if(level === 0) return 100;
+            const one = 5 * Math.pow(level, 2) + (50 * level) + 100;
+            const two = 5 * Math.pow(level + 1, 2) + (50 * (level + 1)) + 100;
+        
+            return two - one;
+        }
+    
+        function getCurrentLevelExp(level, exp) {
+            if(level === 0) return exp;
+            return getTotalExpToLevelUp(level) - (5 * Math.pow(level, 2) + (50 * level) + 100 - exp);
+        }
     }
 }
