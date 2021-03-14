@@ -1,11 +1,13 @@
 const Morpion = require('../../models/Morpion');
-const ConnectFour = require('../../models/ConnectFour');
+const Game = require('../../models/Game');
 const { MessageCollector } = require('discord.js');
 
 module.exports.run = async (client, message, args) => {
     const user = message.mentions.users.first() || client.users.cache.get(args[0]) || client.users.cache.find(u => u.username.toLowerCase().includes(args[0].toLowerCase()));
 
-    if(!user || !message.guild.member(user) || user.bot || (user.id === message.author.id)) return message.channel.send('⚠️ Cet utilisateur n\'existe pas !');
+    if(!user || !message.guild.member(user)) return message.channel.send('⚠️ Cet utilisateur n\'existe pas !');
+    if(user.id === message.author.id) return message.channel.send('⚠️ Vous ne pouvez pas vous battre contre vous-même');
+    if(user.bot) return message.channel.send('⚠️ Vous ne pouvez pas vous battre contre un bot.');
 
     let m = await message.channel.send(`${user}, **${message.author.tag}** veut jouer au morpion avec vous. \nRépondez par oui ou non pour accepter ou refuser.`)
 
@@ -31,7 +33,7 @@ module.exports.run = async (client, message, args) => {
 
     col.on("collect", async (tmsg) => {
         if(tmsg.content.toLowerCase() === "oui") {
-            const existingGame = Morpion.findGameByUsers(client, message.author, user) || ConnectFour.findGameByUsers(client, message.author, user);
+            const existingGame = Game.findGameByUser(client, message.author) || Game.findGameByUser(client, user);
             if(existingGame) {
                 col.stop(true);
 
