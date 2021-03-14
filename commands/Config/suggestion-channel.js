@@ -62,11 +62,11 @@ module.exports.run = (client, message, args, data) => {
 
                 message.channel.send(`✅ Les suggestions ont bien été activés sur le serveur. Toutes les suggestions faites via la commande \`${data.prefix}suggestion\` seront envoyées dans le salon <#${newChannel.id}>!`);
             }
-        })
+        });
 
         c.on("end", (_, reason) => {
             if(reason == "time") return message.channel.send('Temps écoulé');
-        })
+        });
     }
 }
 
