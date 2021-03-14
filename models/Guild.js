@@ -23,6 +23,11 @@ module.exports = mongoose.model("Guild", new Schema(
                     antigiverole: false,
                     antiban: false,
                     antilink: false,
+                    antimaj: false,
+                    antispam: {
+                        enabled: false,
+                        ignored_channels: []
+                    },
                     betterprotection: false
                 },
                 welcome: {
