@@ -5,11 +5,11 @@ module.exports = async (client, member) => {
     if(!data.plugins.goodbye.enabled) return;
 
     let goodbyeMsg = data.plugins.goodbye.message
-    if(goodbyeMsg.includes('{user}')) goodbyeMsg = goodbyeMsg.replace('{user}', member);
-    if(goodbyeMsg.includes('{guildName}')) goodbyeMsg = goodbyeMsg.replace('{guildName}', member.guild.name);
-    if(goodbyeMsg.includes('{memberCount}')) goodbyeMsg = goodbyeMsg.replace('{memberCount}', member.guild.memberCount);
-    if(goodbyeMsg.includes('{username}')) goodbyeMsg = goodbyeMsg.replace('{username}', member.user.username);
-    if(goodbyeMsg.includes('{usertag}')) goodbyeMsg = goodbyeMsg.replace('{usertag}', member.user.tag);
+        .replace('{user}', member)
+        .replace('{guildName}', member.guild.name)
+        .replace('{memberCount}', member.guild.memberCount)
+        .replace('{username}', member.user.username)
+        .replace('{usertag}', member.user.tag);
 
     if(!data.plugins.goodbye.channel) {
         await member.send(goodbyeMsg).catch(() => {});
