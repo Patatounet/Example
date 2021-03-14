@@ -2,7 +2,7 @@ const { MessageEmbed } = require('discord.js');
 const emojis = require('../../emojis');
 
 module.exports.run = async (client, message, args, data) => {
-    let user = message.mentions.users.first() || client.users.cache.get(args[0]) || client.users.cache.find(u => u.username.toLowerCase().includes(args[0].toLowerCase()));
+	let user = message.mentions.users.first() || client.users.cache.get(args[0]) || client.users.cache.find(u => u.username.toLowerCase().includes(args[0].toLowerCase()));
 
     if(!user || !message.guild.member(user)) return message.channel.send('⚠️ Cet utilisateur n\'existe pas !');
 
@@ -11,6 +11,8 @@ module.exports.run = async (client, message, args, data) => {
     const reason = (args.slice(1).join(" ") || "Pas de raison spécifiée");
 
     const member = message.guild.member(user);
+
+    if(member.roles.cache.has(data.muterole)) return message.channel.send('⚠️ Cet utilisateur est déjà muet !');
 
     if(member.hasPermission('ADMINISTRATOR')) return message.channel.send('⚠️ Vous ne pouvez pas mute un administrateur !');
     const memberPosition = member.roles.highest.position;
@@ -63,21 +65,22 @@ module.exports.run = async (client, message, args, data) => {
         })
 
         await member.roles.add(muteRole).then(() => {
+            user.send(`Vous avez été mute sur le serveur **${message.guild.name}** par ${message.author}. Raison : **${reason}**`).catch(() => {});
             message.channel.send(`✅ ${user} s'est fait mute par ${message.author} pour la raison suivante: **${reason}**`);
+
+            if(data.plugins.logs.enabled) {
+                if(message.guild.channels.cache.get(data.plugins.logs.channel)) {
+                    const embed = new MessageEmbed()
+                        .setColor('ORANGE')
+                        .setDescription(`L'utilisateur **${user.username}** s'est fait mute par ${message.author}. \nRaison: **${reason}**`)
+                        .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
+                    message.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
+                }
+            }
         }).catch(err => {
             console.log(err);
             message.channel.send(`Une erreur est survenue, veuillez réessayer. \n\`\`\`js\n${err}\n\`\`\``);
         })
-    }
-
-    if(data.plugins.logs.enabled) {
-        if(message.guild.channels.cache.get(data.plugins.logs.channel)) {
-            const embed = new MessageEmbed()
-                .setColor('ORANGE')
-                .setDescription(`L'utilisateur **${user.username}** s'est fait mute par ${message.author}. \nRaison: **${reason}**`)
-                .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
-            message.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
-        }
     }
 }
 
