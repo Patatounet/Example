@@ -9,13 +9,14 @@ module.exports = async (client, oldMessage, newMessage) => {
         return newMessage.delete().then(() => client.users.cache.get(client.config.owner.id).send("Tu devrais regen ton token. C'est juste un conseil."));
     }
 
+    const dbUser = await client.findOrCreateUser(newMessage.author);
     const data = await client.getGuild(newMessage.guild);
 
     const p = data.members.map(m => m.id).indexOf(newMessage.member.id);
     const userData = data.members[p];
 
     if(newMessage.guild && p == -1) {
-        Guild.updateOne({
+        await Guild.updateOne({
             id: newMessage.guild.id
         },
         { 
@@ -26,7 +27,44 @@ module.exports = async (client, oldMessage, newMessage) => {
                     level: 0
                 }
             }
-        }).then(() => {});
+        });
+    }
+
+    if(data.plugins.protection.antimaj) {
+        if(!newMessage.member.hasPermission('MANAGE_MESSAGES')) {
+            let text = newMessage.content.split('');
+            let upperCaseLetters = 0;
+            const validchars = 'abcdefghigklmnopqerstuvwxyz';
+        
+            for (let i = 0; i < text.length; i++) {
+                if (text[i] === text[i].toUpperCase() && (validchars.includes(text[i].toLowerCase()) || validchars.toUpperCase().includes(text[i].toUpperCase()))) {
+                    upperCaseLetters++
+                }
+            }
+        
+            if(text.length > 5) {
+                if(upperCaseLetters * (1000 / text.length) >= 500) {
+                    newMessage.delete().catch(() => {});
+
+                    dbUser.warns.push({ guildID: newMessage.guild.id, reason: 'Excessive caps', moderator: client.user.id });
+    
+                    dbUser.markModified("warns");
+                    dbUser.save();
+
+                    message.author.send(`Vous avez été averti sur ${newMessage.guild.name} pour **Excessive caps**.`).catch(() => {});
+    
+                    if(data.plugins.logs.enabled) {
+                        if(newMessage.guild.channels.cache.get(data.plugins.logs.channel)) {
+                            const embed = new Discord.MessageEmbed()
+                                .setColor('ORANGE')
+                                .setDescription(`L'utilisateur **${newMessage.author.username}** s'est fait avertir pour **Excessive caps**. Il possède désormais ${dbUser.warns.length} warn(s).`)
+                                .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
+                            newMessage.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     const prefixes = [`<@!${client.user.id}> `, `<@${client.user.id}> `, data.prefix]
@@ -67,18 +105,18 @@ module.exports = async (client, oldMessage, newMessage) => {
 
                     newMessage.guild.channels.cache.get(data.plugins.logs.channel).send({ embed: embed });
                 }
-            })
+            });
         }
     }
 
-    if(!newMessage.content.startsWith(prefix) || newMessage.webhookID) return;
+    if(!newMessage.content.startsWith(prefix) || newMessage.webhookID || !prefix) return;
 
     const args = newMessage.content.slice(prefix.length).split(/ +/);
     const commandName = args.shift().toLowerCase();
     const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.help.aliases && cmd.help.aliases.includes(commandName));
     if(!command) return;
 
-    if(!newMessage.guild.me.permissionsIn(newMessage.channel).has("SEND_MESSAGES") || !newMessage.guild.me.permissionsIn(newMessage.channel).has("READ_MESSAGE_HISTORY")) return newMessage.author.send(`⚠️ ${newMessage.author}, je n'ai pas les permissions de parler ou de voir l'historique de message dans le salon ${newMessage.channel} !`).catch(() => {});
+    if(!newMessage.guild.me.permissionsIn(newMessage.channel).has("SEND_MESSAGES") || !newMessage.guild.me.permissionsIn(newMessage.channel).has("READ_MESSAGE_HISTORY")) return;
 
     if(command.help.botPerms.length > 0) {
         if(!newMessage.guild.me.permissionsIn(newMessage.channel).has(command.help.botPerms)) {
