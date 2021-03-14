@@ -19,41 +19,29 @@ module.exports.run = async (client, message, args, data) => {
 
     await message.delete().catch(() => {});
 
-    if(messages.length == 1) {
-        await messages[0].delete().catch(() => {});
+    await message.channel.bulkDelete(messages).then(deletedMessage => {
+        let deleted = deletedMessage.size;
+        if(deleted === 0) deleted = 1;
 
+        message.channel.send(`✅ ${deleted} messages supprimés de ${user}.`);
+        
         if(data.plugins.logs.enabled) {
             if(message.guild.channels.cache.get(data.plugins.logs.channel)) {
                 const embed = new MessageEmbed()
                     .setColor(client.config.embed.color)
-                    .setDescription(`${message.author} a supprimé 1 message de l'utilisateur **${user.username}**.`)
+                    .setDescription(`${message.author} a supprimé ${deleted} messages de l'utilisateur **${user.username}**.`)
                     .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
                 message.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
             }
         }
-
-        return message.channel.send(`✅ 1 message supprimé de ${user}.`);
-    } else {
-    await message.channel.bulkDelete(messages).catch(err => {
+    }).catch(err => {
         if(err.code == "50034") return message.channel.send(`⚠️ Impossible de supprimer des messages vieux de plus de 2 semaines.`);
         else {
             if(err.code != "10008");
             console.log(err);
             return message.channel.send(`⚠️ Une erreur est survenue, veuillez réessayer. \n\`\`\`js\n${err}\n\`\`\``);
         }
-    })
-        message.channel.send(`✅ ${messages.length} messages supprimés de ${user}.`);
-
-        if(data.plugins.logs.enabled) {
-            if(message.guild.channels.cache.get(data.plugins.logs.channel)) {
-                const embed = new MessageEmbed()
-                    .setColor(client.config.embed.color)
-                    .setDescription(`${message.author} a supprimé ${messages.length} messages de l'utilisateur **${user.username}**.`)
-                    .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
-                message.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
-            }
-        }
-    }
+    });
 }
 
 module.exports.help = {
