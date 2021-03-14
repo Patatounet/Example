@@ -2,15 +2,15 @@ const moment = require('moment');
 const emojis = require('../../emojis');
 
 module.exports.run = async (client, message, args) => {
-    let user;
+	let user;
 
-    if(!args.length) {
-	user = message.author;
-    } else {
-	user = message.mentions.users.first() || client.users.cache.get(args[0]) || client.users.cache.find(u => u.username.toLowerCase().includes(args[0].toLowerCase()));
-    };
+	if(!args.length) {
+		user = message.author;
+	} else {
+		user = message.mentions.users.first() || client.users.cache.get(args[0]) || client.users.cache.find(u => u.username.toLowerCase().includes(args[0].toLowerCase()));
+	};
 
-    if(!user || !message.guild.member(user)) return message.channel.send('⚠️ Cet utilisateur n\'existe pas !');
+	if(!user || !message.guild.member(user)) return message.channel.send('⚠️ Cet utilisateur n\'existe pas !');
 
     const member = message.guild.member(user);
 
@@ -61,7 +61,7 @@ module.exports.run = async (client, message, args) => {
 
             toDisplay+= userActivity.name;
         } else {
-            toDisplay = `${userActivity.emoji ? userActivity.emoji : ""} ${userActivity.state ? userActivity.state : ""}`;
+            toDisplay = `${userActivity.emoji ? userActivity.emoji : ""} ${userActivity.state ? userActivity.state : ""}`
         }
     }
 
@@ -78,7 +78,7 @@ module.exports.run = async (client, message, args) => {
             fields: [
                 {
                     name: "__Infos utilisateur__",
-                    value: `⭐ **Nom d'utilisateur :** ${user.username}\n🤖 **Bot ? :** ${user.bot ? "Oui" : "Non"}\n🔋 **ID utilisateur :** ${user.id}`
+                    value: `⭐ **Nom d'utilisateur :** ${user.username}\n🤖 **Bot ? :** ${user.bot ? "Oui" : "Non"}\n🔋 **ID utilisateur :** ${user.id}\n⏳ **Création du compte :** ${moment(user.createdAt).locale('fr').format('llll')}`
                 },
                 {
                     name: "__Statut utilisateur__",
@@ -86,7 +86,7 @@ module.exports.run = async (client, message, args) => {
                 },
                 {
                     name: "__Infos du membre sur le serveur__",
-                    value: `⏳ **Création du compte :** ${moment(user.createdAt).locale('fr').format('llll')}\n📥 **Rejoint le :** ${moment(member.joinedAt).locale('fr').format('llll')}\n🎭 **Rôles :** ${member.roles.cache.size > 1 ? reste : "Aucun rôle"}`
+                    value: `📥 **Rejoint le :** ${moment(member.joinedAt).locale('fr').format('llll')}\n🎭 **Rôles :** ${member.roles.cache.size > 1 ? reste : "Aucun rôle"}`
                 }
             ],
             footer: {
