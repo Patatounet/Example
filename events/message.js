@@ -192,7 +192,7 @@ module.exports = async (client, message) => {
                 if(level_up_channel && message.guild.channels.cache.get(level_up_channel)) {
                     message.guild.channels.cache.get(level_up_channel).send(`GG ${message.author} ! Tu passes niveau ${newLevel} !`).catch(() => {});
                 } else {
-                    message.channel.send(`GG ${message.author} ! Tu passes niveau ${newLevel} !`);
+                    message.channel.send(`GG ${message.author} ! Tu passes niveau ${newLevel} !`).catch(() => {});
                 }
             }
     
