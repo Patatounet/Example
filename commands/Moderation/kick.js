@@ -20,22 +20,23 @@ module.exports.run = (client, message, args, data) => {
 
     if(!member.kickable) return message.channel.send(`⚠️ Je n'ai pas les permissions suffisantes pour expulser ce membre, vérifiez que mon rôle est au dessus du membre à kick, et réessayez.`);
 
-    message.guild.member(user).kick(reason).catch(err => {
+    message.guild.member(user).kick(reason).then(() => {
+        user.send(`Vous avez été kick du serveur **${message.guild.name}** par ${message.author}. Raison : **${reason}**`).catch(() => {});
+        message.channel.send(`✅ ${user} s'est fait expulser par ${message.author} pour la raison suivante: **${reason}**`);
+
+        if(data.plugins.logs.enabled) {
+            if(message.guild.channels.cache.get(data.plugins.logs.channel)) {
+                const embed = new MessageEmbed()
+                    .setColor('ORANGE')
+                    .setDescription(`L'utilisateur **${user.username}** s'est fait expulser par ${message.author}. \nRaison: **${reason}**`)
+                    .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
+                message.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
+            }
+        }
+    }).catch(err => {
         console.log(err);
         message.channel.send(`⚠️ Une erreur est survenue, veuillez réessayer. \n\`\`\`js\n${err}\n\`\`\``);
-    })
-
-    message.channel.send(`✅ ${user} s'est fait expulser par ${message.author} pour la raison suivante: **${reason}**`);
-
-    if(data.plugins.logs.enabled) {
-        if(data.plugins.logs.channel) {
-            const embed = new MessageEmbed()
-                .setColor('ORANGE')
-                .setDescription(`L'utilisateur **${user.username}** s'est fait expulser par ${message.author}. \nRaison: **${reason}**`)
-                .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
-            message.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
-        }
-    }
+    });
 }
 
 module.exports.help = {
