@@ -20,7 +20,7 @@ module.exports.run = (client, message, args, data) => {
     message.channel.send(`✅ **${message.author.username}** a coupé le son à ${user} dans **${user.voice.channel}**`);
 
     if(data.plugins.logs.enabled) {
-        if(data.plugins.logs.channel) {
+        if(message.guild.channels.cache.get(data.plugins.logs.channel)) {
             const embed = new MessageEmbed()
                 .setColor('RED')
                 .setDescription(`${message.author} a coupé le son à **${user.user.username}** dans **${user.voice.channel}**`)
