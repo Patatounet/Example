@@ -2,6 +2,8 @@ module.exports = async (client, member) => {
     const data = await client.getGuild(member.guild);
     if(!data) return;
 
+    await client.findOrCreateUser(member.user);
+
     if(data.plugins.protection.raidmode === true) {
         member.send("**⚠️ Le Raidmode est activé sur le serveur " + member.guild.name + ", vous avez donc été kick de celui-ci! ⚠️** \nSi vous pensez que c'est une erreur, contactez le propriétaire du serveur.").catch(() => {});
         member.kick("Raidmode activé").catch(err => console.log(err));
@@ -20,11 +22,11 @@ module.exports = async (client, member) => {
     if(!data.plugins.welcome.enabled) return;
 
     let welcomeMsg = data.plugins.welcome.message
-    if(welcomeMsg.includes('{user}')) welcomeMsg = welcomeMsg.replace('{user}', member);
-    if(welcomeMsg.includes('{guildName}')) welcomeMsg = welcomeMsg.replace('{guildName}', member.guild.name);
-    if(welcomeMsg.includes('{memberCount}')) welcomeMsg = welcomeMsg.replace('{memberCount}', member.guild.memberCount);
-    if(welcomeMsg.includes('{username}')) welcomeMsg = welcomeMsg.replace('{username}', member.user.username);
-    if(welcomeMsg.includes('{usertag}')) welcomeMsg = welcomeMsg.replace('{usertag}', member.user.tag);
+        .replace('{user}', member)
+        .replace('{guildName}', member.guild.name)
+        .replace('{memberCount}', member.guild.memberCount)
+        .replace('{username}', member.user.username)
+        .replace('{usertag}', member.user.tag);
 
     if(!data.plugins.welcome.channel) {
         await member.send(welcomeMsg).catch(() => {});
