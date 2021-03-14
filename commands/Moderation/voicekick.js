@@ -10,22 +10,23 @@ module.exports.run = (client, message, args, data) => {
 
     if(!user.voice.channel) return message.channel.send('⚠️ Cet utilisateur n\'est pas connecté dans un vocal.');
 
-    user.voice.kick().catch(err => {
+    user.voice.kick().then(() => {
+        user.send(`Vous avez été expulsé du salon vocal sur le serveur **${message.guild.name}** par ${message.author}.`);
+        message.channel.send(`✅ ${user} a été kick du salon vocal **${user.voice.channel}**`);
+
+        if(data.plugins.logs.enabled) {
+            if(message.guild.channels.cache.get(data.plugins.logs.channel)) {
+                const embed = new MessageEmbed()
+                    .setColor('RED')
+                    .setDescription(`L'utilisateur **${user.user.username}** a été kick du salon vocal **${user.voice.channel}** par ${message.author}`)
+                    .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
+                message.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
+            }
+        }
+    }).catch(err => {
         console.log(err);
         message.channel.send(`⚠️ Une erreur est survenue, veuillez réessayer. \n\`\`\`js\n\`\`\``);
-    })
-
-    message.channel.send(`✅ ${user} a été kick du salon vocal **${user.voice.channel}**`)
-
-    if(data.plugins.logs.enabled) {
-        if(data.plugins.logs.channel) {
-            const embed = new MessageEmbed()
-                .setColor('RED')
-                .setDescription(`L'utilisateur **${user.user.username}** a été kick du salon vocal **${user.voice.channel}** par ${message.author}`)
-                .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
-            message.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
-        }
-    }
+    });
 }
 
 module.exports.help = {
