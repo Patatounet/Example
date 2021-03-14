@@ -11,11 +11,12 @@ module.exports = {
     boost: "<:boost:784753401867141120>",
     partner: "<:partner:784756429293879336>",
     categories: {
-        Administration: "🗃️",
         Config: "🛠️",
+        Economy: "💵",
         Fun: "🥲",
         General: "🌐",
         Giveaways: "🎉",
+        Levels: "🥇",
         Moderation: "⚒️",
         Owner: "👑",
         Protection: "🛡️"
