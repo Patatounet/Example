@@ -19,7 +19,7 @@ module.exports.run = async (client, message, args, data) => {
             }
 
             break;
-        };
+        }
         case "goodbye": {
             if(data.plugins.goodbye.enabled) {
                 data.plugins.goodbye.enabled = false;
@@ -33,7 +33,7 @@ module.exports.run = async (client, message, args, data) => {
             }
 
             break;
-        };
+        }
         case "logs": {
             if(data.plugins.logs.enabled) {
                 data.plugins.logs.enabled = false;
@@ -47,7 +47,7 @@ module.exports.run = async (client, message, args, data) => {
             }
 
             break;
-        };
+        }
         case "autorole": {
             if(data.plugins.autorole.enabled) {
                 data.plugins.autorole.enabled = false;
@@ -61,7 +61,7 @@ module.exports.run = async (client, message, args, data) => {
             }
 
             break;
-        };
+        }
         case "suggestion": {
             if(data.plugins.suggestion.enabled) {
                 data.plugins.suggestion.enabled = false;
