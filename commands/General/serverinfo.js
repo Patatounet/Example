@@ -14,51 +14,44 @@ module.exports.run = (client, message) => {
 
     let guildVerificationLevel = guild.verificationLevel;
     switch (guildVerificationLevel) {
-        case "NONE": {
-            guildVerificationLevel = 'Aucune restriction';
-            break;
-        };
-        case "LOW": {
-            guildVerificationLevel = 'Faible - Doit avoir une adresse e-mail vérifiée sur son compte Discord.';
-            break;
-        };
-        case "MEDIUM": {
-            guildVerificationLevel = 'Moyen - Doit aussi être inscrit sur Discord depuis plus de 5 minutes.';
-            break;
-        };
-        case "HIGH": {
-            guildVerificationLevel = 'Élevé - Doit aussi être un membre de ce serveur depuis plus de 10 minutes.';
-            break;
-        };
-        case "VERY_HIGH": {
-            guildVerificationLevel = 'Maximum - Doit avoir un numéro de téléphone vérifié sur son compte Discord.';
-            break;
-        };
+        case "NONE": guildVerificationLevel = 'Aucune restriction'; break;
+        case "LOW": guildVerificationLevel = 'Faible - Doit avoir une adresse e-mail vérifiée sur son compte Discord.'; break;
+        case "MEDIUM": guildVerificationLevel = 'Moyen - Doit aussi être inscrit sur Discord depuis plus de 5 minutes.'; break;
+        case "HIGH": guildVerificationLevel = 'Élevé - Doit aussi être un membre de ce serveur depuis plus de 10 minutes.'; break;
+        case "VERY_HIGH": guildVerificationLevel = 'Maximum - Doit avoir un numéro de téléphone vérifié sur son compte Discord.'; break;
     };
 
-    const embed = new MessageEmbed()
-        .setColor(client.config.embed.color)
-        .setAuthor(guild.name, guild.iconURL({ dynamic: true }))
-        .addFields(
-            { name: "🏷️ Nom", value: guild.name, inline: true },
-            { name: "👑 Propriétaire", value: guild.members.cache.find(u => u.user.id === guild.ownerID).user.tag, inline: true },
-            { name: "🆕 Créé le", value: moment(guild.createdAt).locale("fr").format("llll"), inline: true },
-            { name: "👨 Membres", value: guild.members.cache.filter(m => !m.user.bot).size + " Humains | " + guild.members.cache.filter(m => m.user.bot).size + " Bots \n\u200b", inline: true },
-            { name: "💬 Salons", value: guild.channels.cache.filter(ch => ch.type === "text").size + " " + emojis.textChannel + " | " + guild.channels.cache.filter(ch => ch.type === "voice").size + " " + emojis.voiceChannel, inline: true },
-            { name: "\u200b", value: "\u200b", inline: true },
-            { name: emojis.boost + " Boosts", value: guild.premiumSubscriptionCount + " boosts (Tier " + guild.premiumTier + ")", inline: true },
-            { name: "🔇 Salon AFK", value: guild.afkChannel ? guild.afkChannel : "Aucun", inline: true },
-            { name: "🚩 Région", value: guild.region.charAt(0).toUpperCase() + guild.region.substr(1).toLowerCase(), inline: true },
-            { name: emojis.partner + " Partenaire", value: guild.partnered ? "Oui" : "Non", inline: true },
-            { name: "🔔 Notifications", value: guildNotifications, inline: true },
-            { name: "🔐 Niveau de vérification", value: guildVerificationLevel, inline: true },
-        )
-        .setFooter(client.config.embed.footer, client.user.displayAvatarURL())
+    let embed = {
+        color: client.config.embed.color,
+        author: {
+            name: guild.name,
+            icon_url: guild.iconURL({ dynamic: true })
+        },
+        thumbnail: {
+            url: guild.iconURL()
+        },
+        fields: [
+            {
+                name: '__Informations générales__',
+                value: `🏷️ **Nom du serveur :** ${guild.name}\n👑 **Propriétaire :** ${guild.members.cache.find(u => u.user.id === guild.ownerID).user.tag}\n🆕 **Date de création :** ${moment(guild.createdAt).locale("fr").format("llll")}\n🚩 **Région :** ${guild.region.charAt(0).toUpperCase() + guild.region.substr(1).toLowerCase()}\n🔐 **Niveau de vérification :** ${guildVerificationLevel}`
+            },
+            {
+                name: '__Autres informations__',
+                value: `**${emojis.boost} Boosts** : ${guild.premiumSubscriptionCount} boosts (Tier ${guild.premiumTier})\n**${emojis.partner} Partenaire ? :** ${guild.partnered ? "Oui" : "Non"}\n🔔 **Notifications :** ${guildNotifications}\n🔇 **Salon AFK :** ${guild.afkChannel ? guild.afkChannel : "Aucun"}\n💬 **Nombre de salons :** ${guild.channels.cache.filter(ch => ch.type === "text").size} ${emojis.textChannel} | ${guild.channels.cache.filter(ch => ch.type === "voice").size} ${emojis.voiceChannel}\n👨 **Nombre de membres :** ${guild.members.cache.filter(m => !m.user.bot).size} Humains | ${guild.members.cache.filter(m => m.user.bot).size} Bots`
+            }
+        ],
+        footer: {
+            text: client.config.embed.footer,
+            icon_url: client.user.displayAvatarURL()
+        }
+    }
 
-        if(guild.description) embed.setDescription(guild.description);
-        if(guild.bannerURL()) embed.setImage(guild.bannerURL({ format: "png", size: 512 }));
+    if(guild.description) embed.description = guild.description;
+    if(guild.bannerURL()) embed.image = {
+        url: guild.bannerURL({ format: "png", size: 512 })
+    }
 
-    message.channel.send(embed);
+    message.channel.send({ embed: embed });
 }
 
 module.exports.help = {
