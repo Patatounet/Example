@@ -12,22 +12,23 @@ module.exports.run = (client, message, args, data) => {
 
     if(user.voice.mute) return message.channel.send('⚠️ Cet utilisateur est déjà mute.')
 
-    user.voice.setMute(true).catch(err => {
+    user.voice.setMute(true).then(() => {
+        user.send(`Vous avez été mute en vocal sur le serveur **${message.guild.name}** par ${message.author}.`).catch(() => {});
+        message.channel.send(`✅ ${user} a été mute du salon vocal **${user.voice.channel}**`);
+
+        if(data.plugins.logs.enabled) {
+            if(message.guild.channels.cache.get(data.plugins.logs.channel)) {
+                const embed = new MessageEmbed()
+                    .setColor('ORANGE')
+                    .setDescription(`L'utilisateur **${user.user.username}** a été mute du salon vocal **${user.voice.channel}** par ${message.author}`)
+                    .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
+                message.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
+            }
+        }
+    }).catch(err => {
         console.log(err);
         message.channel.send(`⚠️ Une erreur est survenue, veuillez réessayer. \n\`\`\`js\n\`\`\``);
-    })
-
-    message.channel.send(`✅ ${user} a été mute du salon vocal **${user.voice.channel}**`);
-
-    if(data.plugins.logs.enabled) {
-        if(data.plugins.logs.channel) {
-            const embed = new MessageEmbed()
-                .setColor('ORANGE')
-                .setDescription(`L'utilisateur **${user.user.username}** a été mute du salon vocal **${user.voice.channel}** par ${message.author}`)
-                .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
-            message.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
-        }
-    }
+    });
 }
 
 module.exports.help = {
