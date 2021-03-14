@@ -1,5 +1,8 @@
 const Discord = require('discord.js');
 const Guild = require('../models/Guild');
+const ms = require('ms');
+let _cooldowns = {};
+let _users = new Map();
 
 module.exports = async (client, message) => {
     if(message.channel.type === "dm" || message.author.bot) return;
@@ -9,6 +12,8 @@ module.exports = async (client, message) => {
     if(message.content.includes(client.token)) {
         return message.delete().then(() => client.users.cache.get(client.config.owner.id).send("Tu devrais regen ton token. C'est juste un conseil."));
     }
+
+    const dbUser = await client.findOrCreateUser(message.author);
 
     const data = await client.getGuild(message.guild);
     if(!data) {
@@ -26,7 +31,7 @@ module.exports = async (client, message) => {
     const userData = data.members[p];
 
     if(message.guild && p == -1) {
-        Guild.updateOne({
+        await Guild.updateOne({
             id: message.guild.id
         },
         { 
@@ -37,7 +42,171 @@ module.exports = async (client, message) => {
                     level: 0
                 }
             }
-        }).then(() => {});
+        });
+    }
+
+    if(data.plugins.protection.antispam?.enabled) {
+        if(!data.plugins.protection.antispam.ignored_channels.includes(message.channel.id)) {
+            if(!message.member.hasPermission("MANAGE_MESSAGES")) {
+                if(_users.has(message.author.id)) {
+                    const user = _users.get(message.author.id);
+            
+                    if(!(((message.createdTimestamp - user.lastMessage.createdTimestamp) < 3000) && user.messages.length > 5)) {
+                        user.messages.push(message);
+                        user.lastMessage = message;
+            
+                        if(user.messages.length === 4) {
+                            dbUser.warns.push({ guildID: message.guild.id, reason: 'Spam', moderator: client.user.id });
+                
+                            dbUser.markModified("warns");
+                            dbUser.save();
+            
+                            message.author.send(`Vous avez été warn pour **Spam** sur ${message.guild.name}. Si vous continuez, vous sera automatiquement rendu muet.`);
+            
+                            if(data.plugins.logs.enabled) {
+                                if(message.guild.channels.cache.get(data.plugins.logs.channel)) {
+                                    const embed = new Discord.MessageEmbed()
+                                        .setColor('ORANGE')
+                                        .setDescription(`L'utilisateur **${message.author.username}** s'est fait avertir pour **Spam**. Il possède désormais ${dbUser.warns.length} warn(s).`)
+                                        .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
+                                    message.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
+                                }
+                            }
+                        } else if(user.messages.length >= 6) {
+                            dbUser.tempmutes.push({ guildID: message.guild.id, reason: "Spam", moderator: client.user.id, duration: ms(ms(60 * 60 * 1000)), endsAt: (Date.now() + ms(60 * 60 * 1000)) });
+            
+                            dbUser.markModified("tempmutes");
+                            dbUser.save();
+            
+                            message.author.send(`Vous avez été rendu muet pendant **1h** pour **Spam** sur ${message.guild.name}.`).catch(() => {});
+    
+                            if(data.muterole) {
+                                await message.member.roles.add(data.muterole);
+                            } else {
+                                await message.guild.roles.create({
+                                    data: {
+                                        name: "Muted",
+                                        color: "#000000",
+                                        permissions: [],
+                                        position: message.guild.member(client.user).roles.highest.position,
+                                        mentionnable: false
+                                    }
+                                }).then(async (muterole) => {
+                                    await client.updateGuild(message.guild, { muterole: muterole.id });
+    
+                                    message.guild.channels.cache.forEach(channel => {
+                                        if(!message.guild.me.permissionsIn(channel).has("MANAGE_CHANNELS")) return;
+                                        channel.updateOverwrite(role, {
+                                            SEND_MESSAGES: false,
+                                            ADD_REACTIONS: false,
+                                            CONNECT: false,
+                                        });
+                                    });
+                        
+                                    await member.roles.add(role).then(() => {
+                                        message.channel.send(`✅ ${user} s'est fait mute par ${message.author} pour la raison suivante: **${reason}**`);
+                                    }).catch(() => {});
+                                }).catch(() => {});
+                            }
+            
+                            if(data.plugins.logs.enabled) {
+                                if(message.guild.channels.cache.get(data.plugins.logs.channel)) {
+                                    const embed = new Discord.MessageEmbed()
+                                        .setColor('ORANGE')
+                                        .setDescription(`L'utilisateur **${message.author.username}** s'est fait mute 1h pour **Spam**.`)
+                                        .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
+                                    message.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
+                                }
+                            }
+                        }
+            
+                        setTimeout(() => user.messages.pop(), 10000);
+                    }
+            
+                } else {
+                    _users.set(message.author.id, {
+                        messages: [],
+                        lastMessage: message
+                    });
+                }       
+            }
+        }
+    }
+
+    if(data.plugins.protection.antimaj) {
+        if(!message.member.hasPermission('MANAGE_MESSAGES')) {
+            let text = message.content.split('');
+            let upperCaseLetters = 0;
+            const validchars = 'abcdefghigklmnopqerstuvwxyz';
+
+            for (let i = 0; i < text.length; i++) {
+                if (text[i] === text[i].toUpperCase() && (validchars.includes(text[i].toLowerCase()) || validchars.toUpperCase().includes(text[i].toUpperCase()))) {
+                    upperCaseLetters++
+                }
+            }
+
+            if(text.length > 5) {
+                if(upperCaseLetters * (1000 / text.length) >= 500) {
+                    message.delete().catch(() => {});
+
+                    dbUser.warns.push({ guildID: message.guild.id, reason: 'Excessive caps', moderator: client.user.id });
+
+                    dbUser.markModified("warns");
+                    dbUser.save();
+
+                    message.author.send(`Vous avez été averti sur ${message.guild.name} pour **Excessive caps**.`).catch(() => {});
+
+                    if(data.plugins.logs.enabled) {
+                        if(message.guild.channels.cache.get(data.plugins.logs.channel)) {
+                            const embed = new Discord.MessageEmbed()
+                                .setColor('ORANGE')
+                                .setDescription(`L'utilisateur **${message.author.username}** s'est fait avertir pour **Excessive caps**. Il possède désormais ${dbUser.warns.length} warn(s).`)
+                                .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
+                            message.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if(data.plugins.levels.enabled) {
+        if(!(_cooldowns[message.author.id] > Date.now())) {
+            _cooldowns[message.author.id] = Date.now() + 1500 * 60; // 1:30 minute cooldown
+    
+            if(!userData) return;
+    
+            const generated = Math.floor(Math.random() * (25 - 15 + 1) + 15); // generate a random number between 15 and 25
+            const newExp = userData.exp + generated;
+            const newLevel = userData.level + 1
+
+            await client.updateUserLevel(message.author, message.guild, { "members.$.exp": newExp });
+
+            let levelUp = null;
+            if((5 * (Math.pow(userData.level, 2)) + 50 * userData.level + 100 - newExp) <= 0) { // check if necessary xp to level up is achieved
+                await client.updateUserLevel(message.author, message.guild, { "members.$.level": newLevel });
+    
+                levelUp = true;
+
+                const level_up_channel = data.plugins.levels.level_up_channel;
+                if(level_up_channel && message.guild.channels.cache.get(level_up_channel)) {
+                    message.guild.channels.cache.get(level_up_channel).send(`GG ${message.author} ! Tu passes niveau ${newLevel} !`).catch(() => {});
+                } else {
+                    message.channel.send(`GG ${message.author} ! Tu passes niveau ${newLevel} !`);
+                }
+            }
+    
+            if(levelUp) { // give role rewards
+                const giveRole = data.plugins.levels.roles_rewards.some(obj => Object.keys(obj)[0] == `l${newLevel.toString()}`);
+    
+                if(giveRole) {
+                    const roleToGive = data.plugins.levels.roles_rewards.find(reward => Object.keys(reward)[0] == `l${newLevel.toString()}`);
+                    await message.guild.roles.fetch(roleToGive[`l${newLevel.toString()}`]).then(role => {
+                        message.guild.member(message.author).roles.add(role).catch(() => {});
+                    }).catch(() => {});
+                }
+            }
+        }
     }
 
     const prefixes = [`<@!${client.user.id}> `, `<@${client.user.id}> `, data.prefix]
@@ -46,7 +215,26 @@ module.exports = async (client, message) => {
         if(message.content.startsWith(p)) {
             prefix = p;
         }
-    })
+    });
+
+    if(message.mentions.members.size > 0 && !message.content.startsWith(prefix) && !(message.mentions.members.first()?.id === message.author.id)) {
+        message.mentions.members.forEach(async (member) => {
+            const user = await client.findOrCreateUser(member.user);
+            if(user?.afk?.is_afk) message.channel.send(`Hey ${message.author}, ${member.user.tag} est actuellement afk : **${Discord.Util.removeMentions(user.afk.reason)}**`);
+        });
+    }
+
+    if(dbUser && dbUser?.afk?.is_afk && !message.content.startsWith(`${data.prefix}setafk`)) {
+        dbUser.afk = {
+            is_afk: false,
+            reason: null
+        }
+
+        dbUser.markModified("afk");
+        dbUser.save();
+
+        message.channel.send(`${message.author} n'est désormais plus afk.`);
+    }
 
     if(message.guild.me.permissionsIn(message.channel).has('SEND_MESSAGES')) {
         if(message.content.match(new RegExp(`^<@!?${client.user.id}>( |)$`))) {
@@ -89,13 +277,13 @@ module.exports = async (client, message) => {
         }
     }
 
-    if(!message.content.startsWith(prefix) || message.webhookID) return;
-    
+    if(!message.content.startsWith(prefix) || message.webhookID || !prefix) return;
+
     const args = message.content.slice(prefix.length).split(/ +/);
     const commandName = args.shift().toLowerCase();
     const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.help.aliases && cmd.help.aliases.includes(commandName));
     if(!command) return;
-    
+
     if(!message.guild.me.permissionsIn(message.channel).has("SEND_MESSAGES") || !message.guild.me.permissionsIn(message.channel).has("READ_MESSAGE_HISTORY")) return;
 
     if(command.help.botPerms.length > 0) {
