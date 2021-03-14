@@ -1,7 +1,7 @@
 const { MessageCollector } = require("discord.js");
 
 module.exports.run = async (client, message) => {
-    message.channel.send('Voulez-vous vraiment remettre la configuration du serveur ? Cette action est irréversible. \nRépondez par oui ou par non.');
+    message.channel.send('Voulez-vous vraiment remettre à 0 la configuration du serveur ? Cette action est irréversible. \nRépondez par oui ou par non.');
 
     const filter = m => m.author.id === message.author.id
 
@@ -20,7 +20,12 @@ module.exports.run = async (client, message) => {
                         raidmode: false,
                         antigiverole: false,
                         antiban: false,
-                        antilink: false
+                        antilink: false,
+                        antimaj: false,
+                        antispam: {
+                            enabled: false,
+                            ignored_channels: []
+                        }
                     },
                     welcome: {
                         enabled: false,
@@ -43,21 +48,30 @@ module.exports.run = async (client, message) => {
                     suggestion: {
                         enabled: false,
                         channel: null
+                    },
+                    economy: {
+                        enabled: true,
+                        currency: "$"
+                    },
+                    levels: {
+                        enabled: true,
+                        level_up_channel: null,
+                        roles_rewards: []
                     }
                 },
                 muterole: null
-            })
+            });
         
             message.channel.send('✅ La configuration a bien été reset.');
         } else {
             c.stop(true);
             message.channel.send('Commande annulée');
         }
-    })
+    });
 
     c.on("end", (_collected, reason) => {
         if(reason === "time") return message.channel.send('Temps écoulé');
-    })
+    });
 }
 
 module.exports.help = {
