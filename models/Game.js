@@ -14,6 +14,14 @@ module.exports = class Game {
         }
     }
 
+    static findGameByUser(client, user) {
+        return client.games.find(
+            (game) => 
+                (game.players[0].id === user.id) ||
+                (game.players[1].id === user.id)
+        );
+    }
+
     static findGameByUsers(client, user1, user2) {
         return client.games.find(
             (game) =>
