@@ -8,6 +8,8 @@ module.exports.run = async (client, message, args, data) => {
 
     if(user.cooldowns.crime > Date.now()) return message.channel.send(`❌ Hey ! Vous avez déjà commis un crime aujourd'hui, vous pourrez en refaire un dans **${ms(user.cooldowns.crime - Date.now())}**`);
 
+    if(user.money < 1) return message.channel.send('❌ Vous ne pouvez pas utiliser la commande `crime` lorsque votre total est négatif ou nul !');
+
     const chanceToWin = Math.floor(Math.random() * 100) + 1;
 
     if(chanceToWin >= 60) {
