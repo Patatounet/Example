@@ -4,15 +4,12 @@ module.exports.run = async (client, message, args, data) => {
     const member = message.mentions.members.first() || message.guild.members.cache.get(args[0]) || message.guild.members.cache.find(u => u.user.username.toLowerCase().includes(args[0]?.toLowerCase())) || message.guild.member(message.author);
 
     let user = await client.findOrCreateUser(member.user);
-    if(!user) user = {
-        money: 0,
-        bank: 0
-    }
+    if(!user) return message.channel.send('❌ Cet utilisateur n\'est pas classé!');
 
     const rank = (await require('../../models/User').find({}))
         .map(user => { return { total: user.money + user.bank, ...user } })
         .sort((a, b) => b.total - a.total)
-        .findIndex(user => user._doc.id === message.author.id);
+        .findIndex(user => user._doc.id === member.user.id);
 
     message.channel.send({
         embed: {
