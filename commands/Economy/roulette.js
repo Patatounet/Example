@@ -9,9 +9,9 @@ module.exports.run = async (client, message, args, data) => {
 
     let played = args[1];
 
-    if(played === "black" || played === "noir" || played == 0) played = "n";
+    if(played === "black" || played === "noir") played = "n";
     if(played === "red" || played === "rouge") played = "r";
-    if(played === "green" || played === "vert") played = "v";
+    if(played === "green" || played === "vert" || played == 0) played = "v";
 
     if(!(played === "v" || played === "r" || played === "n") && (played < 0 || played > 36 || isNaN(played))) return message.channel.send('⚠️ Merci de parier un élément valide. \n**Exemples**: \n`roulette 100 rouge`\n`roulette 100 vert`\n`roulette 100 black`\n`roulette 100 34`');
 
@@ -23,36 +23,36 @@ module.exports.run = async (client, message, args, data) => {
     setTimeout(() => {
         msg.delete();
 
-        const result = Math.floor(Math.random() * 37);
+        const result = Math.floor(Math.random() * 36);
 
         if(result === 0 && (played === "v" || played === 0)) {
             user.money = user.money + bet * 15;
-    
+
             user.markModified("money");
             user.save();
-    
+
             message.channel.send(`🎉 Félicitations ! La roulette est tombée sur le chiffre **0**, vous remportez **${bet * 15}${data.plugins.economy.currency}** !`);
         } else if((result % 2 === 0) && played === "n") {
             user.money = user.money + bet * 2;
-    
+
             user.markModified("money");
             user.save();
-    
+
             message.channel.send(`La roulette est tombée sur le **${result}**, donc sur le **noir**, tu gagnes **${bet * 2}${data.plugins.economy.currency}**`);
         } else if((result % 2 === 1) && played === "r") {
             user.money = user.money + bet * 2;
-    
+
             user.markModified("money");
             user.save();
-    
+
             message.channel.send(`La roulette est tombée sur le **${result}**, donc sur le **rouge**, tu gagnes **${bet * 2}${data.plugins.economy.currency}**`);
         } else if(result == parseInt(played)) {
             user.money = user.money + bet * 15;
-    
+
             user.markModified("money");
             user.save();
-    
-            message.channe.send(`🎉 Félicitations ! La roulette est tombée sur le chiffre **${result}**, vous remportez **${bet * 15}${data.plugins.economy.currency}** !`);
+
+            message.channel.send(`🎉 Félicitations ! La roulette est tombée sur le chiffre **${result}**, vous remportez **${bet * 15}${data.plugins.economy.currency}** !`);
         } else {
             message.channel.send(`La roulette est tombée sur le **${result} ${(result % 2 === 0) ? "noir" : "rouge"}**, vous ne gagnez rien.`);
         }
