@@ -9,10 +9,7 @@ module.exports.run = async (client, message, args, data) => {
     let user = await client.findOrCreateUser(message.author);
     if(!user) return message.channel.send('❌ Votre compte en banque n\'était pas créé, veuillez réessayer.');
 
-    if(bet > user.money || bet < 1) return message.channel.send('⚠️ Vous ne pouvez miser plus que ce vous avez dans votre balance !');
-
-    user.money = user.money - bet;
-    user.save();
+    if(bet > user.money || bet < 1 || isNaN(bet)) return message.channel.send('⚠️ Vous ne pouvez miser plus que ce vous avez dans votre balance !');
 
     const game = new Blackjack(message.author, parseInt(bet));
 
