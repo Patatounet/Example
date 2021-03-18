@@ -50,9 +50,9 @@ Derniers détails pour que cotre config soit parfaite :
 `?autorole` pour que vos nouveaux membres recoivent automatiquement un rôle !  
 `?variables` pour voir les variables disponibles pour le message de bienvenue et d'aurevoir  
 `?setprefix` pour modifier le préfixe du bot !  
-`?ignore-channel` pour ignore un salon par l'antispam !  
+`?ignore-channel` pour ignorer un salon par l'antispam !  
 Revérifiez toute la configuration du serveur avec la commande `?config` !  
-Si vous souhaitez tout réinitialiser la config, faites `?reset-config` :(
+Si vous souhaitez réinitialiser toute la config, faites `?reset-config` :(
 
 ## Commandes
 ```js
