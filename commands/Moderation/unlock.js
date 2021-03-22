@@ -21,6 +21,6 @@ module.exports.help = {
     usage: "",
     cooldown: 5,
     memberPerms: ["MANAGE_CHANNELS"],
-    botPerms: ["MANAGES_CHANNELS"],
+    botPerms: ["MANAGE_CHANNELS"],
     args: false
 }
