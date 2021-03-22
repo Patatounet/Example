@@ -23,7 +23,7 @@ module.exports.run = async (client, message, args, data) => {
     const embed = {
         color: client.config.embed.color,
         title: 'Top 10 des utilisateurs de RainsBot les plus riches',
-        description: userPosition <= 10 ? `GG ! Vous faites parti du top 10 !` : `Vous êtes ${userPosition + 1}ème du classement.`,
+        description: userPosition < 10 ? `GG ! Vous faites parti du top 10 !` : `Vous êtes ${userPosition + 1}ème du classement.`,
         author: {
             icon_url: message.author.displayAvatarURL({ dynamic: true }),
             name: message.author.username
@@ -46,7 +46,7 @@ module.exports.run = async (client, message, args, data) => {
 
 module.exports.help = {
     name: "top-money",
-    aliases: ["top-money", "moneyleaderboard", "money-leaderboard"],
+    aliases: ["top-money", "moneyleaderboard", "money-leaderboard", "top"],
     category: "Economy",
     description: "Voir le top 10 des utilisateurs de RainsBot avec le plus d'argent",
     usage: "",
