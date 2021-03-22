@@ -13,7 +13,7 @@ module.exports.run = async (client, message, args, data) => {
     if(played === "red" || played === "rouge") played = "r";
     if(played === "green" || played === "vert" || played == 0) played = "v";
 
-    if(!(played === "v" || played === "r" || played === "n") && (played < 0 || played > 36 || isNaN(played))) return message.channel.send('⚠️ Merci de parier un élément valide. \n**Exemples**: \n`roulette 100 rouge`\n`roulette 100 vert`\n`roulette 100 black`\n`roulette 100 34`');
+    if(!(played === "v" || played === "r" || played === "n") && (played < 0 || played > 36 || isNaN(played)) || isNaN(bet)) return message.channel.send('⚠️ Merci de parier un élément valide. \n**Exemples**: \n`roulette 100 rouge`\n`roulette 100 vert`\n`roulette 100 black`\n`roulette 100 34`');
 
     user.money = user.money - bet;
     user.save();
@@ -32,6 +32,8 @@ module.exports.run = async (client, message, args, data) => {
             user.save();
 
             message.channel.send(`🎉 Félicitations ! La roulette est tombée sur le chiffre **0**, vous remportez **${bet * 15}${data.plugins.economy.currency}** !`);
+        } else if(result === 0) {
+            message.channel.send('La roulette est tombée sur le 0, tu ne gagnes rien.');
         } else if((result % 2 === 0) && played === "n") {
             user.money = user.money + bet * 2;
 
