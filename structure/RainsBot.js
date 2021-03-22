@@ -72,33 +72,32 @@ module.exports = class RainsBot extends Client {
 
         // Send message and DM when a user votes for the bot
         app.post('/dblwebhook', webhook.middleware(), async (req, res) => {
-            const user = this.users.cache.get(req.vote.user);
-            if(!user) return this.channels.cache.get(this.config.support.votes).send("Impossible de déterminer qui vient de voter pour moi.");
+            this.users.fetch(req.vote.user).then(async (user) => {
+                const dbUser = await this.findOrCreateUser(user);
+                if(dbUser) {
+                    dbUser.bank = dbUser.bank + 10000;
 
-            const dbUser = await this.findOrCreateUser(user);
-            if(dbUser) {
-                dbUser.bank = dbUser.bank + 10000;
-
-                dbUser.markModified("bank");
-                dbUser.save();
-            }
-
-            this.channels.cache.get(this.config.support.votes).send({
-                embed: {
-                    color: this.config.embed.color,
-                    description: `**${user.tag}** vient juste de voter pour moi, merci beaucoup ! \nSi vous voulez voter pour moi, cliquez [ici](https://top.gg/bot/${this.user.id}) !`,
-                    author: {
-                        name: user.username,
-                        icon_url: user.displayAvatarURL({ dynamic: true })
-                    },
-                    footer: {
-                        text: this.config.embed.footer,
-                        icon_url: this.user.displayAvatarURL()
-                    }
+                    dbUser.markModified("bank");
+                    dbUser.save();
                 }
-            });
 
-            user.send('Merci d\'avoir voté pour moi ! 10 000$ ont été rajoutés à votre compte en banque.').catch(() => {});
+                this.channels.cache.get(this.config.support.votes).send({
+                    embed: {
+                        color: this.config.embed.color,
+                        description: `**${user.tag}** vient juste de voter pour moi, merci beaucoup ! \nSi vous voulez voter pour moi, cliquez [ici](https://top.gg/bot/${this.user.id}) !`,
+                        author: {
+                            name: user.username,
+                            icon_url: user.displayAvatarURL({ dynamic: true })
+                        },
+                        footer: {
+                            text: this.config.embed.footer,
+                            icon_url: this.user.displayAvatarURL()
+                        }
+                    }
+                });
+
+                user.send('Merci d\'avoir voté pour moi ! 10 000$ ont été rajoutés à votre compte en banque.').catch(() => {});
+            }).catch(() => this.channels.cache.get(this.config.support.votes).send("Impossible de déterminer qui vient de voter pour moi"));
         });
 
     	app.listen(80);
