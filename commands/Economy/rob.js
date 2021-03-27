@@ -59,7 +59,7 @@ module.exports.help = {
     aliases: ["rob"],
     category: "Economy",
     description: "Voler un autre utilisateur. A vos risques et périls !",
-    usage: "",
+    usage: "<membre>",
     cooldown: 2,
     memberPerms: [],
     botPerms: [],
