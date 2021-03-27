@@ -1,11 +1,10 @@
-const { MessageEmbed } = require("discord.js");
 const emojis = require('../../emojis');
 const moment = require('moment');
 
 module.exports.run = (client, message) => {
     if(!message.guild.available) return;
 
-    let guild = message.guild;
+    const guild = message.guild;
 
     let guildNotifications = guild.defaultMessageNotifications;
 
@@ -33,7 +32,7 @@ module.exports.run = (client, message) => {
         fields: [
             {
                 name: '__Informations générales__',
-                value: `🏷️ **Nom du serveur :** ${guild.name}\n👑 **Propriétaire :** ${guild.members.cache.find(u => u.user.id === guild.ownerID).user.tag}\n🆕 **Date de création :** ${moment(guild.createdAt).locale("fr").format("llll")}\n🚩 **Région :** ${guild.region.charAt(0).toUpperCase() + guild.region.substr(1).toLowerCase()}\n🔐 **Niveau de vérification :** ${guildVerificationLevel}`
+                value: `🏷️ **Nom du serveur :** ${guild.name}\n👑 **Propriétaire :** ${guild.members.cache.get(guild.ownerID) ? guild.members.cache.get(guild.ownerID).user.tag : `<@${guild.ownerID}>` }\n🆕 **Date de création :** ${moment(guild.createdAt).locale("fr").format("llll")}\n🚩 **Région :** ${guild.region.charAt(0).toUpperCase() + guild.region.substr(1).toLowerCase()}\n🔐 **Niveau de vérification :** ${guildVerificationLevel}`
             },
             {
                 name: '__Autres informations__',
@@ -47,9 +46,7 @@ module.exports.run = (client, message) => {
     }
 
     if(guild.description) embed.description = guild.description;
-    if(guild.bannerURL()) embed.image = {
-        url: guild.bannerURL({ format: "png", size: 512 })
-    }
+    if(guild.bannerURL()) embed.image = { url: guild.bannerURL({ format: "png", size: 512 }) }
 
     message.channel.send({ embed: embed });
 }
