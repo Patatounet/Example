@@ -1,39 +1,32 @@
-const { MessageEmbed } = require('discord.js');
 const emojis = require('../../emojis');
 const Guild = require('../../models/Guild');
 
 module.exports.run = async (client, message) => {
-    const embed = new MessageEmbed()
-        .setColor(client.config.embed.color)
-        .addFields(
-            { name: "Latence messages", value: emojis.chargement },
-            { name: "Latence API", value: emojis.chargement },
-            { name: "Base de données", value: emojis.chargement },
-        )
-        .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
+    const embed = {
+        color: client.config.embed.color,
+        fields: [
+            { name: '**Latence messages**', value: emojis.chargement },
+            { name: '**Latence API**', value: emojis.chargement },
+            { name: '**Base de données**', value: emojis.chargement },
+        ],
+        footer: {
+            text: client.config.embed.footer,
+            icon_url: client.user.displayAvatarURL()
+        }
+    };
 
-    message.channel.send(embed).then(async m => {
+    message.channel.send({ embed: embed }).then(async (m) => {
+        embed.fields[0].value = `${Date.now() - m.createdTimestamp}ms`;
+
+        embed.fields[1].value = `${client.ws.ping}ms`;
+
         const date = Date.now();
-
         await Guild.findOne({ id: message.guild.id });
-        const bddPing = `${Date.now() - date}ms`;
 
-        const APIPing = `${client.ws.ping}ms`;
+        embed.fields[2].value = `${Date.now() - date}ms`;
 
-        const messagesPing = `${m.createdTimestamp - message.createdTimestamp}ms`;
-        if(messagesPing >= 500) { client.channels.cache.get(client.config.support.logs).send(`⚠️ **La latence du bot est élevée (${ping}ms)**`) };
-
-        const newEmbed = new MessageEmbed()
-            .setColor(client.config.embed.color)
-            .addFields(
-                { name: "Latence messages", value: messagesPing },
-                { name: "Latence API", value: APIPing },
-                { name: "Base de données", value: bddPing },
-            )
-            .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
-
-        m.edit(newEmbed);
-    })
+        await m.edit({ embed: embed });
+    });
 }
 
 module.exports.help = {
@@ -42,7 +35,7 @@ module.exports.help = {
     category: "General",
     description: "Vérifier la latence du bot",
     usage: "",
-    cooldown: 10,
+    cooldown: 5,
     memberPerms: [],
     botPerms: [],
     args: false
