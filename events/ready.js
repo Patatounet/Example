@@ -1,13 +1,11 @@
 module.exports = client => {
-    async function setActivity() {
-        client.user.setActivity(client.config.status.name.replace("{serversCount}", client.guilds.cache.size).replace("{usersCount}", client.getAllUsers()), { type: client.config.status.type });
-    };
+    const setActivity = () => setTimeout(async () => {
+        await client.user.setPresence({ activity: { name: client.config.status.name.replace(/{serversCount}/g, client.guilds.cache.size).replace(/{usersCount}/g, client.getAllUsers()), type: client.config.status.type } });
 
-    setActivity().then(() => {
-        setInterval(() => {
-            setActivity();
-        }, 60000);
-    });
+        setActivity();
+    }, 30 * 60 * 1000); // 30 min
+
+    setActivity();
 
     client.channels.fetch(client.config.support.logs).then(channel => {
         channel.send("✅ **Le bot est connecté!**");
