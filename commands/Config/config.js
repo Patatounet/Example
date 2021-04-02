@@ -25,7 +25,7 @@ module.exports.run = (client, message, args, data) => {
                 },
                 {
                     name: "🥇 Levels",
-                    value: `Activé: ${data.plugins.levels.enabled ? "`Oui`" : "`Non`"} \nSalon de montées en niveaux: ${data.plugins.levels.level_up_channel ? `<#${data.plugins.levels.level_up_channel}>` : "`Aucun`"}`,
+                    value: `Activé: ${data.plugins.levels.enabled ? "`Oui`" : "`Non`"} \nSalon de montées en niveau: ${data.plugins.levels.level_up_channel ? `<#${data.plugins.levels.level_up_channel}>` : "`Aucun`"} \nMessage de montées de niveau: \`${data.plugins.levels.level_up_message ? data.plugins.levels.level_up_message : 'GG {user} ! Tu passes niveau {level} !'}\``,
                     inline: true
                 },
                 {
