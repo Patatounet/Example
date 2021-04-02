@@ -182,21 +182,17 @@ module.exports = async (client, message) => {
 
             await client.updateUserLevel(message.author, message.guild, { "members.$.exp": newExp });
 
-            let levelUp = null;
             if((5 * (Math.pow(userData.level, 2)) + 50 * userData.level + 100 - newExp) <= 0) { // check if necessary xp to level up is achieved
                 await client.updateUserLevel(message.author, message.guild, { "members.$.level": newLevel });
-    
-                levelUp = true;
 
                 const level_up_channel = data.plugins.levels.level_up_channel;
                 if(level_up_channel && message.guild.channels.cache.get(level_up_channel)) {
-                    message.guild.channels.cache.get(level_up_channel).send(`GG ${message.author} ! Tu passes niveau ${newLevel} !`).catch(() => {});
+                    message.guild.channels.cache.get(level_up_channel).send(client.formatLevelUpMessage(data.plugins.levels.level_up_message ? data.plugins.levels.level_up_message : 'GG {user} ! Tu passes niveau {level} !', message.author, { level: newLevel, exp: newExp })).catch(() => {});
                 } else {
-                    message.channel.send(`GG ${message.author} ! Tu passes niveau ${newLevel} !`).catch(() => {});
+                    message.channel.send(client.formatLevelUpMessage(data.plugins.levels.level_up_message ? data.plugins.levels.level_up_message : 'GG {user} ! Tu passes niveau {level} !', message.author, { level: newLevel, exp: newExp })).catch(() => {});
                 }
-            }
-    
-            if(levelUp) { // give role rewards
+
+                // give role rewards
                 const giveRole = data.plugins.levels.roles_rewards.some(obj => Object.keys(obj)[0] == `l${newLevel.toString()}`);
     
                 if(giveRole) {
@@ -272,7 +268,7 @@ module.exports = async (client, message) => {
 
                         message.guild.channels.cache.get(data.plugins.logs.channel).send({ embed: embed });
                     }
-                })
+                });
             }
         }
     }
