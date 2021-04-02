@@ -36,7 +36,7 @@ module.exports.run = (client, message) => {
             },
             {
                 name: '__Autres informations__',
-                value: `**${emojis.boost} Boosts** : ${guild.premiumSubscriptionCount} boosts (Tier ${guild.premiumTier})\n**${emojis.partner} Partenaire ? :** ${guild.partnered ? "Oui" : "Non"}\n🔔 **Notifications :** ${guildNotifications}\n🔇 **Salon AFK :** ${guild.afkChannel ? guild.afkChannel : "Aucun"}\n💬 **Nombre de salons :** ${guild.channels.cache.filter(ch => ch.type === "text").size} ${emojis.textChannel} | ${guild.channels.cache.filter(ch => ch.type === "voice").size} ${emojis.voiceChannel}\n👨 **Nombre de membres :** ${guild.members.cache.filter(m => !m.user.bot).size} Humains | ${guild.members.cache.filter(m => m.user.bot).size} Bots`
+                value: `**${emojis.boost} Boosts  :** ${guild.premiumSubscriptionCount} boosts (Tier ${guild.premiumTier})\n**${emojis.partner} Partenaire ? :** ${guild.partnered ? "Oui" : "Non"}\n🔔 **Notifications :** ${guildNotifications}\n🔇 **Salon AFK :** ${guild.afkChannel ? guild.afkChannel : "Aucun"}\n💬 **Nombre de salons :** ${guild.channels.cache.filter(ch => ch.type === "text").size} ${emojis.textChannel} | ${guild.channels.cache.filter(ch => ch.type === "voice").size} ${emojis.voiceChannel}\n👨 **Nombre de membres :** ${guild.memberCount} (${guild.members.cache.filter(m => m.user.bot).size} bots)`
             }
         ],
         footer: {
