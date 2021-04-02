@@ -7,7 +7,7 @@ module.exports.run = async (client, message, args, data) => {
     
     const dbUser = await client.findOrCreateUser(user);
 
-    if(user.id == message.author.id) return message.channel.send(`⚠️ Vous ne pouvez pas vous warn vous même ${emojis.facepalm}`);
+    if(user.id == message.author.id) return message.channel.send(`⚠️ Vous ne pouvez pas clear vos warns ${require('../../emojis').facepalm}`);
 
     if(!dbUser || dbUser?.warns?.length < 1) return message.channel.send('❌ Cet utilisateur n\'a aucun avertissement sur le serveur.');
 
