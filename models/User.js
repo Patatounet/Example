@@ -1,7 +1,6 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const { Schema, model } = require('mongoose');
 
-module.exports = mongoose.model("User", new Schema(
+module.exports = model("User", new Schema(
     {
         _id: Schema.Types.ObjectId,
         id: String,
