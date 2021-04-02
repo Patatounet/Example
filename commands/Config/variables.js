@@ -1,12 +1,21 @@
-const { MessageEmbed } = require("discord.js")
-
 module.exports.run = (client, message) => {
-    const embed = new MessageEmbed()
-        .setColor(client.config.embed.color)
-        .setAuthor(message.author.username, message.author.displayAvatarURL({ dynamic: true }))
-        .setDescription('Voici les variables disponibles que vous pouvez utiliser sur le message de bienvenue et d\'aurevoir : \n\n**{user}** ➔ Mentionner le membre \n**{username}** ➔ Nom d\'utilisateur du membre \n**{usertag}** ➔ Tag (nom d\'utilisateur + discriminateur) du membre \n**{guildName}** ➔ Nom du serveur \n**{memberCount}** ➔ Nombre de membres sur le serveur')
-        .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
-    message.channel.send(embed);
+    message.channel.send({
+        embed: {
+            color: client.config.embed.color,
+            author: {
+                name: message.author.username,
+                icon_url: message.author.displayAvatarURL({ dynamic: true })
+            },
+            fields: [
+                { name: 'Variables messages de bienvenue et aurevoir', value: '**{user}** ➔ Mentionner le membre \n**{username}** ➔ Nom d\'utilisateur du membre \n**{usertag}** ➔ Tag (nom d\'utilisateur + discriminateur) du membre \n**{guildName}** ➔ Nom du serveur \n**{memberCount}** ➔ Nombre de membres sur le serveur' },
+                { name: 'Variables messages de montées en niveau', value: '**{user}** ➔ Mentionner le membre \n**{username}** ➔ Nom d\'utilisateur du membre \n**{usertag}** ➔ Tag (nom d\'utilisateur + discriminateur) du membre \n**{level}** ➔ Level qu\'a atteint la personne \n**{exp}** ➔ Expérience totale de la personne' },
+            ],
+            footer: {
+                text: client.config.embed.footer,
+                icon_url: client.user.displayAvatarURL()
+            }
+        }
+    });
 }
 
 module.exports.help = {
