@@ -9,22 +9,39 @@ module.exports.run = async (client, message, args, data) => {
     if(!dbUser) return message.channel.send('❌ Votre compte n\'était pas créé, veuillez réessayer.');
 
     let toUpdate = args[0].toLowerCase();
-    if(!(toUpdate === "progress-bar" || toUpdate === "text" || toUpdate === "avatar")) return message.channel.send(`⚠️ Merci de spécifier un élément valide à éditer. \n**Exemples:** \n\`edit-rankcard progress-bar blue\`\n\`edit-rankcard text #ffff00\`\n\`edit-rankcard avatar 1015739\``);
+    if(!(toUpdate === "progress-bar" || toUpdate === "text" || toUpdate === "avatar" || toUpdate === "background")) return message.channel.send(`⚠️ Merci de spécifier un élément valide à éditer. \n**Exemples:** \n\`edit-rankcard progress-bar blue\`\n\`edit-rankcard text #ffff00\`\n\`edit-rankcard avatar 1015739\`\n\`edit-rankcard background https://i.imgur.com/HQ0M2Zd.png\``);
+
+    let updated = args[1];
+    const isValid = (require('discord.js').Util.resolveColor(updated) === "NaN") ? false : true;
+
+    if(toUpdate === "background") {
+        if(isValid) {
+            if(!isNaN(updated)) updated = updated.toString(16);
+        } else if(!updated || !updated.startsWith('https://')) return message.channel.send('❌ Merci d\'envoyer un lien ou une couleur valide!');
+    } else {
+        updated = updated.toUpperCase();
+
+        if(!args[1] || !isValid) return message.channel.send(`⚠️ Merci de spécifier une couleur valide. \n**Exemples:** \n\`edit-rankcard progress-bar blue\`\n\`edit-rankcard text #ffff00\`\n\`edit-rankcard avatar 1015739\`\n\`edit-rankcard background https://i.imgur.com/HQ0M2Zd.png\``);
     
-    let newColor = args[1]?.toUpperCase();
-    const isValid = (require('discord.js').Util.resolveColor(newColor) === "NaN") ? false : true;
+        if(!isNaN(updated)) updated = updated.toString(16);
+    }
 
-    if(!args[1] || !isValid) return message.channel.send(`⚠️ Merci de spécifier une couleur valide. \n**Exemples:** \n\`edit-rankcard progress-bar blue\`\n\`edit-rankcard text #ffff00\`\n\`edit-rankcard avatar 1015739\``);
+    let msg;
 
-    if(!isNaN(newColor)) newColor = newColor.toString(16);
-
-    const msg = await message.channel.send('**Voici une prévisualisation de votre rankcard :**\nVoulez-vous enregistrer les modifications ?', { files: 
-        [{ attachment: await client.generateRankcard(message.member, userData, { 
-            progress_bar_color: ((toUpdate === "progress-bar") ? newColor : dbUser.rankcard.progress_bar_color),
-            text_color: ((toUpdate === "text") ? newColor : dbUser.rankcard.text_color),
-            avatar_color: ((toUpdate === "avatar") ? newColor : dbUser.rankcard.avatar_color)
-        }), name: "rank.png" }]
-    });
+    try {
+        msg = await message.channel.send('**Voici une prévisualisation de votre rankcard :**\nVoulez-vous enregistrer les modifications ?', { 
+            files: 
+                [{ attachment: await client.generateRankcard(message.member, userData, { 
+                    progress_bar_color: ((toUpdate === "progress-bar") ? updated : dbUser.rankcard.progress_bar_color),
+                    text_color: ((toUpdate === "text") ? updated : dbUser.rankcard.text_color),
+                    avatar_color: ((toUpdate === "avatar") ? updated : dbUser.rankcard.avatar_color),
+                    background: ((toUpdate === "background") ? updated : dbUser.rankcard.background_image),
+                }),
+            name: "rank.png" }]
+        });
+    } catch {
+        return message.channel.send('Une erreur est survenue lors du chargement de la rankcard, assurez-vous que vous avez bien mis une image valide.')
+    }
 
     await msg.react("✅");
     await msg.react("❌");
@@ -42,9 +59,10 @@ module.exports.run = async (client, message, args, data) => {
                     case 'progress-bar': toUpdate = "progress_bar_color"; break;
                     case 'text': toUpdate = "text_color"; break;
                     case 'avatar': toUpdate = "avatar_color"; break;
+                    case 'background': toUpdate = "background"; break;
                 }
 
-                dbUser.rankcard[toUpdate] = newColor;
+                dbUser.rankcard[toUpdate] = updated;
 
                 dbUser.markModified("rankcard");
                 dbUser.save();
@@ -64,9 +82,9 @@ module.exports.help = {
     aliases: ["edit-rankcard", "rankcard", "rank-card", "editrankcard"],
     category: 'Levels',
     description: "Editer les couleurs de sa rankcard.",
-    usage: "<progress-bar | text | avatar>",
+    usage: "<progress-bar | text | avatar | background>",
     cooldown: 5,
     memberPerms: [],
-    botPerms: [],
+    botPerms: ["ATTACH_FILES"],
     args: true
 }
