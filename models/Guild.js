@@ -1,8 +1,7 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const { model, Schema } = require('mongoose');
 const config = require('../config');
 
-module.exports = mongoose.model("Guild", new Schema(
+module.exports = model("Guild", new Schema(
     {
         _id: Schema.Types.ObjectId,
         id: String,
@@ -27,8 +26,7 @@ module.exports = mongoose.model("Guild", new Schema(
                     antispam: {
                         enabled: false,
                         ignored_channels: []
-                    },
-                    betterprotection: false
+                    }
                 },
                 welcome: {
                     enabled: false,
@@ -59,7 +57,11 @@ module.exports = mongoose.model("Guild", new Schema(
                 levels: {
                     enabled: true,
                     level_up_channel: null,
+                    level_up_message: null,
                     roles_rewards: []
+                },
+                privatechannels: {
+                    channelID: null
                 }
             }
         },
