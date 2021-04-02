@@ -17,7 +17,7 @@ module.exports.run = async (client, message) => {
                 },
                 {
                     name: 'Utilisateurs',
-                    value: client.getAllUsers(),
+                    value: client.getAllUsers,
                     inline: true
                 },
                 {
