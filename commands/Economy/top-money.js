@@ -35,13 +35,15 @@ module.exports.run = async (client, message, args, data) => {
         }
     }
 
-    allUsers.splice(0, 10).forEach((user, i) => {
-        const rUser = client.users.cache.get(user._doc.id);
+    for (const [i, user] of allUsers.splice(0, 10).entries()) {
+        await client.users.fetch(user._doc.id).then((rUser) => {
+            embed.fields.push({ name: `${formatRank(i + 1)} ${rUser.username}`, value: `**${client.formatNumber(user.total)}$**` })
+        }).catch(() => {
+            embed.fields.push({ name: `${formatRank(i + 1)} Utilisateur inconnu`, value: `**${client.formatNumber(user.total)}$**` });
+        });
+    }
 
-        embed.fields.push({ name: rUser ? `${formatRank(i + 1)} ${rUser.username}`: `${formatRank(i + 1)} Utilisateur inconnu`, value: `**${client.formatNumber(user.total)}$**` });
-    });
-
-    message.channel.send({ embed: embed })
+    message.channel.send({ embed: embed });
 }
 
 module.exports.help = {
