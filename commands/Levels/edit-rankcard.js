@@ -9,19 +9,26 @@ module.exports.run = async (client, message, args, data) => {
     if(!dbUser) return message.channel.send('❌ Votre compte n\'était pas créé, veuillez réessayer.');
 
     let toUpdate = args[0].toLowerCase();
-    if(!(toUpdate === "progress-bar" || toUpdate === "text" || toUpdate === "avatar" || toUpdate === "background")) return message.channel.send(`⚠️ Merci de spécifier un élément valide à éditer. \n**Exemples:** \n\`edit-rankcard progress-bar blue\`\n\`edit-rankcard text #ffff00\`\n\`edit-rankcard avatar 1015739\`\n\`edit-rankcard background https://i.imgur.com/HQ0M2Zd.png\``);
+    if(!(toUpdate === "progress-bar" || toUpdate === "text" || toUpdate === "avatar" || toUpdate === "background")) return message.channel.send(`⚠️ Merci de spécifier un élément valide à éditer. \n**Exemples:** \n\`edit-rankcard progress-bar blue\`\n\`edit-rankcard text #ffff00\`\n\`edit-rankcard avatar 1015739\`\n\`edit-rankcard background https://i.imgur.com/HaknLzh.png\``);
 
     let updated = args[1];
-    const isValid = (require('discord.js').Util.resolveColor(updated) === "NaN") ? false : true;
+    let isValid;
+    try {
+        isValid = (require('discord.js').Util.resolveColor(updated) === "NaN") ? false : true;
+    } catch {
+        return message.channel.send('❌ Couleur invalide !');
+    }
 
     if(toUpdate === "background") {
-        if(isValid) {
-            if(!isNaN(updated)) updated = updated.toString(16);
-        } else if(!updated || !updated.startsWith('https://')) return message.channel.send('❌ Merci d\'envoyer un lien ou une couleur valide!');
+        if(message.attachments.first()) {
+            updated = message.attachments.first().url;
+        } else if(isValid) {
+            if(!isNaN(updated)) updated = updated?.toString(16);
+        } else if(!updated || !updated.startsWith('https://')) return message.channel.send('❌ Merci d\'envoyer une image ou une couleur valide!');
     } else {
-        updated = updated.toUpperCase();
+        updated = updated?.toUpperCase();
 
-        if(!args[1] || !isValid) return message.channel.send(`⚠️ Merci de spécifier une couleur valide. \n**Exemples:** \n\`edit-rankcard progress-bar blue\`\n\`edit-rankcard text #ffff00\`\n\`edit-rankcard avatar 1015739\`\n\`edit-rankcard background https://i.imgur.com/HQ0M2Zd.png\``);
+        if(!updated || !isValid) return message.channel.send(`⚠️ Merci de spécifier une couleur valide. \n**Exemples:** \n\`edit-rankcard progress-bar blue\`\n\`edit-rankcard text #ffff00\`\n\`edit-rankcard avatar 1015739\`\n\`edit-rankcard background https://i.imgur.com/HaknLzh.png\``);
     
         if(!isNaN(updated)) updated = updated.toString(16);
     }
@@ -35,7 +42,7 @@ module.exports.run = async (client, message, args, data) => {
                     progress_bar_color: ((toUpdate === "progress-bar") ? updated : dbUser.rankcard.progress_bar_color),
                     text_color: ((toUpdate === "text") ? updated : dbUser.rankcard.text_color),
                     avatar_color: ((toUpdate === "avatar") ? updated : dbUser.rankcard.avatar_color),
-                    background: ((toUpdate === "background") ? updated : dbUser.rankcard.background_image),
+                    background: ((toUpdate === "background") ? updated : dbUser.rankcard.background),
                 }),
             name: "rank.png" }]
         });
@@ -51,9 +58,9 @@ module.exports.run = async (client, message, args, data) => {
     };
 
     msg.awaitReactions(filter, { max: 1, time: 15000, errors: ['time'] })
-        .then(collected => {
+        .then(async (collected) => {
             if(collected.first().emoji.name === "✅") {
-                msg.reactions.removeAll();
+                await msg.delete().catch(() => {});
 
                 switch (toUpdate) {
                     case 'progress-bar': toUpdate = "progress_bar_color"; break;
@@ -69,7 +76,7 @@ module.exports.run = async (client, message, args, data) => {
 
                 message.channel.send("✅ Les modifications ont bien été enregistrées à votre rankcard.")
             } else if(collected.first().emoji.name === "❌") {
-                msg.reactions.removeAll();
+                await msg.delete().catch(() => {});
 
                 message.channel.send("ℹ️ Les modifications n'ont pas été enregistrées.");
             }
