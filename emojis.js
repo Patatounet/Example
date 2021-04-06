@@ -10,6 +10,8 @@ module.exports = {
     voiceChannel: "<:voiceChannel:784752271434973186>",
     boost: "<:boost:784753401867141120>",
     partner: "<:partner:784756429293879336>",
+    disabled: "<:disabled_plugin:828677039338422322>",
+    enabled: "<:enabled_plugin:828676868176740403>",
     categories: {
         Config: "🛠️",
         Economy: "💵",
