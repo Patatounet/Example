@@ -12,10 +12,6 @@ module.exports = async (client, oldState, newState) => {
     const channel = guild.channels.resolve(memberData?.channelID);
     const oldChannel = guild.channels.resolve(oldState.channelID);
 
-    if(newState.channelID) {
-        if(!guild.me.permissionsIn(newState.channelID).has('MANAGE_CHANNELS')) return;
-    }
-
     if(!guild.me.hasPermission(['MANAGE_CHANNELS', 'MOVE_MEMBERS'])) return;
 
     if(newState.channelID === data.plugins.privatechannels?.channelID) {
