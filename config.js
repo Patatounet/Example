@@ -2,7 +2,7 @@ module.exports = {
     support: {
         id: "",
         logs: "",
-        votes: ""
+        voteRole: ""
     },
     prefix: "?",
     defaultsSettings: {
