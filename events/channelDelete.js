@@ -1,10 +1,14 @@
-const { MessageEmbed } = require('discord.js');
+const PrivateChannel = require('../models/PrivateChannel');
 
 module.exports = async (client, channel) => {
     if(channel.type == "dm") return;
 
     const data = await client.getGuild(channel.guild);
     if(!data) return;
+
+    if(await PrivateChannel.findOne({ channelID: channel.id })) {
+        await PrivateChannel.findOneAndDelete({ channelID: channel.id });
+    }
 
     if(data.plugins.logs.enabled) {
         if(data.plugins.logs.channel) {
@@ -26,14 +30,20 @@ module.exports = async (client, channel) => {
             const latestChannelDeleted = fetchGuildAuditLogs.entries.first();
             const { executor } = latestChannelDeleted;
 
-            const embed = new MessageEmbed()
-                .setColor('RED')
-                .setAuthor(`${executor.username} a supprimé un salon`, executor.displayAvatarURL({ dynamic: true }))
-                .addField('Nom', channel.name, true)
-                .addField('Type', cType, true)
-                .setFooter('ID: ' + channel.id)
-                .setTimestamp();
-            channel.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
+            if(channel.guild.channels.cache.get(data.plugins.logs.channel)) {
+                channel.guild.channels.cache.get(data.plugins.logs.channel).send({
+                    embed: {
+                        color: 'RED',
+                        author: { name: `${executor.username} a supprimé un salon`, icon_url: executor.displayAvatarURL({ dynamic: true }) },
+                        fields: [
+                            { name: 'Nom', value: channel.name, inline: true },
+                            { name: 'Type', value: cType, inline: true },
+                        ],
+                        footer: { text: 'ID ' + channel.id },
+                        timestamp: new Date()
+                    }
+                });
+            }
         }
     }
 }
