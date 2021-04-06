@@ -80,6 +80,13 @@ module.exports = class RainsBot extends Client {
                     dbUser.markModified("bank");
                     dbUser.save();
                 }
+                
+                const support = this.guilds.cache.get(this.config.support.id)
+
+                if(support.roles.cache.get(this.config.support.voteRole)) {
+                    const member = support.members.cache.get(user.id);
+                    if(member) await member.roles.add(this.config.support.voteRole);
+                }
 
                 this.channels.cache.get(this.config.support.votes).send({
                     embed: {
