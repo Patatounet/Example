@@ -1,6 +1,8 @@
 const botinfos = require('../../package.json');
 
 module.exports.run = async (client, message) => {
+    const d = require('moment').duration(client.uptime);
+
     message.channel.send({
         embed: {
             color: client.config.embed.color,
@@ -32,7 +34,7 @@ module.exports.run = async (client, message) => {
                 },
                 {
                     name: 'Uptime',
-                    value: `${(Math.round(client.uptime / (1000 * 60 * 60 * 24)) % 30)}j ${(Math.round(client.uptime / (1000 * 60 * 60)))}h ${(Math.round(client.uptime / (1000 * 60)) % 60)}m ${(Math.round(client.uptime / 1000) % 60)}s`,
+                    value: `${d.days()}j ${d.hours()}h ${d.minutes()}m ${d.seconds()}s`,
                     inline: true
                 },
                 {
@@ -67,7 +69,7 @@ module.exports.run = async (client, message) => {
                 },
                 {
                     name: "Crédits",
-                    value: "[Androz2091](https://github.com/Androz2091/AtlantaBot)",
+                    value: "[Androz2091](https://github.com/Androz2091/AtlantBot)",
                     inline: true
                 }
             ],
