@@ -1,4 +1,4 @@
-<img align=left src="https://i.imgur.com/PoB7SMxh.jpg" width="150" alt="RainsBot" />
+<img align=left src="https://i.imgur.com/0xij5z0.png" width="150" alt="RainsBot" />
 
 <a href="https://discord.gg/SSWQamBCFE"><img src="https://img.shields.io/discord/787006944974995476?color=7289da&logo=discord&logoColor=white" alt="Serveur support" /></a>
 <a href="https://github.com/COCO150/RainsBot"><img src="https://img.shields.io/github/stars/COCO150/RainsBot?style=social" alt="GitHub" /></a>
@@ -26,6 +26,7 @@ Vous pouvez retrouver toutes les nouveautés sur [notre support](https://discord
 * 🥇 `Levels`: Rank card customisable, roles rewards
 * 👋 `Bienvenue et Aurevoir`: Message et salon configurable
 * ⚒️ `Logs`: Salon modifiable
+* 🔒 `Salons privés`: Création customisable
 * 🎉 `Giveaways`: Start, End, Reroll
 * 💡 `Suggestions`: Salon modifiable
 
@@ -50,18 +51,18 @@ Derniers détails pour que cotre config soit parfaite :
 `?autorole` pour que vos nouveaux membres recoivent automatiquement un rôle !  
 `?variables` pour voir les variables disponibles pour le message de bienvenue et d'aurevoir  
 `?setprefix` pour modifier le préfixe du bot !  
-`?ignore-channel` pour ignorer un salon par l'antispam !  
+`?ignore-channel` pour ignore un salon par l'antispam !  
 Revérifiez toute la configuration du serveur avec la commande `?config` !  
-Si vous souhaitez réinitialiser toute la config, faites `?reset-config` :(
+Si vous souhaitez tout réinitialiser la config, faites `?reset-config` :(
 
 ## Commandes
 ```js
-🛠️ Config [11]: autorole, config, enable, goodbye, logschannel, et plus...
-💵 Economy [12]: blackjack, crime, daily, weekly, roulette, et plus...
+🛠️ Config [12]: autorole, config, enable, goodbye, logschannel, et plus...
+💵 Economy [13]: blackjack, crime, daily, weekly, roulette, et plus...
 😂 Fun [11]: connect4, ascii, morpion, quiz, pfc, et plus...
 🌐 General [15]: avatar, botinfo, embed, emoji-info, setafk, et plus...
 🎉 Giveaways [3]: start, end, reroll
-⚒️ Moderation [20]: mute, clear, clearusermsg, deafen, tempmute, warn, et plus...
+⚒️ Moderation [21]: mute, clear, clearusermsg, deafen, tempmute, warn, et plus...
 🛡️ Protection [7]: antigiverole, antilink, raidmode, antimaj, antispam...
 ```
 
