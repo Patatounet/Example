@@ -7,7 +7,7 @@ let _users = new Map();
 module.exports = async (client, message) => {
     if(message.channel.type === "dm" || message.author.bot) return;
 
-    if(!message.member) await message.guild.fetchMember(message.author);
+    if(!message.member) await message.guild.members.fetch(message.author.id);
 
     if(message.content.includes(client.token)) {
         return message.delete().then(() => client.users.cache.get(client.config.owner.id).send("Tu devrais regen ton token. C'est juste un conseil."));
@@ -27,7 +27,7 @@ module.exports = async (client, message) => {
         return message.channel.send(welcomeEmbed).catch(() => {});
     }
 
-    const p = data.members.map(m => m.id).indexOf(message.member.id);
+    const p = data.members.map(m => m.id).indexOf(message.author.id);
     const userData = data.members[p];
 
     if(message.guild && p == -1) {
@@ -334,7 +334,7 @@ module.exports = async (client, message) => {
     setTimeout(() => tStamps.delete(message.author.id), cdAdmount);
 
     try {
-        command.run(client, message, args, data, userData);  
+        command.run(client, message, args, data, userData);
     } catch (error) {
         console.log(error.message);
         message.channel.send(`Une erreur est survenue lors de l\'exécution de la commande. \n\`\`\`js\n${error.message}\n\`\`\``);
