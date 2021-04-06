@@ -61,7 +61,8 @@ module.exports = model("Guild", new Schema(
                     roles_rewards: []
                 },
                 privatechannels: {
-                    channelID: null
+                    channelID: null,
+                    parentID: null
                 }
             }
         },
