@@ -6,11 +6,6 @@ module.exports.run = async (client, message, args, data) => {
     let user = await client.findOrCreateUser(member.user);
     if(!user) return message.channel.send('❌ Cet utilisateur n\'est pas classé!');
 
-    const rank = (await require('../../models/User').find({}))
-        .map(user => { return { total: user.money + user.bank, ...user } })
-        .sort((a, b) => b.total - a.total)
-        .findIndex(user => user._doc.id === member.user.id);
-
     message.channel.send({
         embed: {
             color: client.config.embed.color,
@@ -18,7 +13,6 @@ module.exports.run = async (client, message, args, data) => {
                 name: member.user.tag,
                 icon_url: member.user.displayAvatarURL({ dynamic: true })
             },
-            description: `**Rang**: ${(rank + 1) === 1 ? "1er" : `${rank + 1}ème`}`,
             fields: [
                 {
                     name: 'Argent:',
