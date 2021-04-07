@@ -12,18 +12,22 @@ module.exports.run = async (client, message, args, data) => {
         return r;
     }
 
-    const allUsers = (await require('../../models/User').find({}))
+    const allUsers = (await require('../../models/User').find().sort({
+            bank: -1,
+            money: -1
+        }).limit(10))
         .map(user => {
-            return { total: user.money + user.bank, ...user }
+            return {
+                total: user.money + user.bank,
+                ...user
+            }
         })
         .sort((a, b) => b.total - a.total);
-
-    const userPosition = allUsers.findIndex(user => user._doc.id === message.author.id);
 
     const embed = {
         color: client.config.embed.color,
         title: 'Top 10 des utilisateurs de RainsBot les plus riches',
-        description: userPosition < 10 ? `GG ! Vous faites parti du top 10 !` : `Vous êtes ${userPosition + 1}ème du classement.`,
+        description: allUsers.find(u => u._doc.id === message.author.id) ? `GG ! Vous faites parti du top 10 !` : `Vous ne faites pas parti du top 10.`,
         author: {
             icon_url: message.author.displayAvatarURL({ dynamic: true }),
             name: message.author.username
@@ -35,7 +39,7 @@ module.exports.run = async (client, message, args, data) => {
         }
     }
 
-    for (const [i, user] of allUsers.splice(0, 10).entries()) {
+    for (const [i, user] of allUsers.entries()) {
         await client.users.fetch(user._doc.id).then((rUser) => {
             embed.fields.push({ name: `${formatRank(i + 1)} ${rUser.username}`, value: `**${client.formatNumber(user.total)}$**` })
         }).catch(() => {
@@ -43,7 +47,7 @@ module.exports.run = async (client, message, args, data) => {
         });
     }
 
-    message.channel.send({ embed: embed });
+    message.channel.send({ embed });
 }
 
 module.exports.help = {
