@@ -14,7 +14,7 @@ module.exports = async (client, oldState, newState) => {
 
     if(!guild.me.hasPermission(['MANAGE_CHANNELS', 'MOVE_MEMBERS'])) return;
 
-    if(newState.channelID === data.plugins.privatechannels?.channelID) {
+    if(data.plugins.privatechannels?.channelID && (newState.channelID === data.plugins.privatechannels?.channelID)) {
         const options = {
             type: 'voice',
             bitrate: 64000,
