@@ -5,7 +5,7 @@ module.exports = async (client, oldState, newState) => {
     const data = await client.getGuild(guild);
     if(!data) return;
 
-    const member = await guild.members.fetch(newState.member.id).catch(() => {});
+    const member = await guild.members.fetch(newState.member).catch(() => {});
     if(!member || member?.user?.bot) return;
 
     const memberData = await PrivateChannel.findOne({ ownerID: member.id });
