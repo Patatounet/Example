@@ -8,6 +8,7 @@ module.exports = async (client, message) => {
     if(message.channel.type === "dm" || message.author.bot) return;
 
     if(!message.member) await message.guild.members.fetch(message.author.id);
+    if(message.member === null) return;
 
     if(message.content.includes(client.token)) {
         return message.delete().then(() => client.users.cache.get(client.config.owner.id).send("Tu devrais regen ton token. C'est juste un conseil."));
