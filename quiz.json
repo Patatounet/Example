@@ -13,7 +13,7 @@
     },
     {
         "question": "Quelle est la vidéo la plus regardée au monde sur YouTube ?",
-        "reponses": ["Despacito"]
+        "reponses": ["Baby Shark"]
     },
     {
         "question": "Un père et un fils ont à eux deux 36ans. Le père a 30 ans de plus que le fils. Quel âge a le fils ?",
@@ -50,9 +50,5 @@
     {
         "question": "En quelle année a été créé Discord ?",
         "reponses": ["2015"]
-    },
-    {
-        "question": "Qui est le créateur de RainsBot ?",
-        "reponses": ["COCO150"]
     }
 ]
