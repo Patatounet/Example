@@ -153,5 +153,29 @@ module.exports = class RainsBot extends Client {
                 }
             });
         }, 10000);
+
+        // Update members count channels every 10 min
+        setInterval(async () => {
+            (await Guild.find({ "plugins.membercount.parentID": { $ne: null } })).forEach((gData) => {
+                this.channels.fetch(gData.plugins.membercount.parentID).then(async (channel) => {
+                    const { guild } = channel;
+                    if(guild.members.cache.size !== guild.memberCount) await guild.members.fetch();
+
+                    Object.keys(gData.plugins.membercount.channels).forEach(async (type) => {
+                        const ch = gData.plugins.membercount.channels[type];
+                        const channel = guild.channels.resolve(ch.id);
+
+                        let toUpdate;
+                        switch (type) {
+                            case 'members': toUpdate = guild.members.cache.filter((m) => !m.user.bot).size; break;
+                            case 'bots': toUpdate = guild.members.cache.filter((m) => m.user.bot).size; break;
+                            case 'totalMembers': toUpdate = guild.memberCount; break;
+                        }
+
+                        if(channel) await channel.edit({ name: ch.name.replace('{count}', toUpdate) });
+                    });
+                }).catch(() => {});
+            });
+        }, 1000 * 60 * 10);
     }
 }
