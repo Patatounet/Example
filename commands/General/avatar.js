@@ -1,17 +1,7 @@
-const emojis = require('../../emojis');
-
 module.exports.run = async (client, message, args) => {
-    let user;
-
-    if(!args.length) {
-        user = message.author;
-    } else {
-    user = message.mentions.users.first() || client.users.cache.get(args[0]) || client.users.cache.find(u => u.username.toLowerCase().includes(args[0].toLowerCase()));
-    };
+    const user = message.mentions.users.first() || client.users.cache.get(args[0]) || client.users.cache.find(u => u.username.toLowerCase().includes(args[0]?.toLowerCase())) || message.author;
 
     if(!user || !message.guild.member(user)) return message.channel.send('⚠️ Cet utilisateur n\'existe pas !');
-
-    let msg = await message.channel.send(`Chargement... ${emojis.chargement}`);
 
 	message.channel.send({ 
         embed: {
@@ -21,11 +11,7 @@ module.exports.run = async (client, message, args) => {
 			    url: user.displayAvatarURL({ size: 512, dynamic: true })
 		    },
         }
-    }).catch(err => {
-		message.channel.send(`⚠️ Une erreur est survenue, veuillez réessayer. \nErreur: \`\`\`js\n${err}\n\`\`\``)
-	});
-
-	await msg.delete().catch(() => {});
+    });
 }
 
 module.exports.help = {
@@ -38,4 +24,4 @@ module.exports.help = {
     memberPerms: [],
     botPerms: ["EMBED_LINKS"],
     args: false
-};
+}
