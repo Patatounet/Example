@@ -31,35 +31,39 @@ module.exports = async (client, oldMessage, newMessage) => {
     }
 
     if(data.plugins.protection.antimaj) {
-        if(!newMessage.member.hasPermission('MANAGE_MESSAGES')) {
-            let text = newMessage.content.split('');
-            let upperCaseLetters = 0;
-            const validchars = 'abcdefghigklmnopqerstuvwxyz';
-        
-            for (let i = 0; i < text.length; i++) {
-                if (text[i] === text[i].toUpperCase() && (validchars.includes(text[i].toLowerCase()) || validchars.toUpperCase().includes(text[i].toUpperCase()))) {
-                    upperCaseLetters++
-                }
-            }
-        
-            if(text.length > 5) {
-                if(upperCaseLetters * (1000 / text.length) >= 500) {
-                    newMessage.delete().catch(() => {});
+        if(!data.plugins.protection.ignored_channels?.includes(newMessage.channel.id)) {
+            if(!newMessage.member.roles.cache.array().some((role, i) => role.id === (data.plugins.protection.ignored_roles ? data.plugins.protection.ignored_roles[i] : null))) {
+                if(!newMessage.member.hasPermission('MANAGE_MESSAGES')) {
+                    let text = newMessage.content.split('');
+                    let upperCaseLetters = 0;
+                    const validchars = 'abcdefghigklmnopqerstuvwxyz';
 
-                    dbUser.warns.push({ guildID: newMessage.guild.id, reason: 'Excessive caps', moderator: client.user.id });
-    
-                    dbUser.markModified("warns");
-                    dbUser.save();
+                    for (let i = 0; i < text.length; i++) {
+                        if (text[i] === text[i].toUpperCase() && (validchars.includes(text[i].toLowerCase()) || validchars.toUpperCase().includes(text[i].toUpperCase()))) {
+                            upperCaseLetters++
+                        }
+                    }
+                
+                    if(text.length > 5) {
+                        if(upperCaseLetters * (1000 / text.length) >= 500) {
+                            newMessage.delete().catch(() => {});
 
-                    message.author.send(`Vous avez été averti sur ${newMessage.guild.name} pour **Excessive caps**.`).catch(() => {});
-    
-                    if(data.plugins.logs.enabled) {
-                        if(newMessage.guild.channels.cache.get(data.plugins.logs.channel)) {
-                            const embed = new Discord.MessageEmbed()
-                                .setColor('ORANGE')
-                                .setDescription(`L'utilisateur **${newMessage.author.username}** s'est fait avertir pour **Excessive caps**. Il possède désormais ${dbUser.warns.length} warn(s).`)
-                                .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
-                            newMessage.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
+                            dbUser.warns.push({ guildID: newMessage.guild.id, reason: 'Excessive caps', moderator: client.user.id });
+
+                            dbUser.markModified("warns");
+                            dbUser.save();
+
+                            message.author.send(`Vous avez été averti sur ${newMessage.guild.name} pour **Excessive caps**.`).catch(() => {});
+
+                            if(data.plugins.logs.enabled) {
+                                if(newMessage.guild.channels.cache.get(data.plugins.logs.channel)) {
+                                    const embed = new Discord.MessageEmbed()
+                                        .setColor('ORANGE')
+                                        .setDescription(`L'utilisateur **${newMessage.author.username}** s'est fait avertir pour **Excessive caps**. Il possède désormais ${dbUser.warns.length} warn(s).`)
+                                        .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
+                                    newMessage.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
+                                }
+                            }
                         }
                     }
                 }
@@ -76,36 +80,41 @@ module.exports = async (client, oldMessage, newMessage) => {
     });
 
     if(data.plugins.protection.antilink) {
-        if(/discord(?:(?:app)?\.com\/invite|\.gg(?:\/invite)?)\/([\w-]{2,255})/i.test(newMessage.content)) {
-            if(!newMessage.guild.member(newMessage.author).hasPermission("MANAGE_MESSAGES"));
-            return newMessage.delete().then(() => {
-                if(data.plugins.logs.enabled && data.plugins.logs.channel) {
-                    let embed = {
-                        color: 'RED',
-                        author: {
-                            name: newMessage.author.username,
-                            icon_url: newMessage.author.displayAvatarURL({ dynamic: true })
-                        },
-                        description: `${newMessage.author} a envoyé une pub dans ${newMessage.channel}!`,
-                        fields: [
-                            {
-                                name: "Message d'origine",
-                                value: newMessage.content
+        if(!data.plugins.protection.ignored_channels?.includes(newMessage.channel.id)) {
+            if(!newMessage.member.roles.cache.array().some((role, i) => role.id === (data.plugins.protection.ignored_roles ? data.plugins.protection.ignored_roles[i] : null))) {
+                if(/discord(?:(?:app)?\.com\/invite|\.gg(?:\/invite)?)\/([\w-]{2,255})/i.test(newMessage.content)) {
+                    if(!newMessage.guild.member(newMessage.author).hasPermission("MANAGE_MESSAGES")) {
+                        return newMessage.delete().then(() => {
+                            if(data.plugins.logs.enabled && data.plugins.logs.channel) {
+                                let embed = {
+                                    color: 'RED',
+                                    author: {
+                                        name: newMessage.author.username,
+                                        icon_url: newMessage.author.displayAvatarURL({ dynamic: true })
+                                    },
+                                    description: `${newMessage.author} a envoyé une pub dans ${newMessage.channel}!`,
+                                    fields: [
+                                        {
+                                            name: "Message d'origine",
+                                            value: newMessage.content
+                                        }
+                                    ],
+                                    footer: {
+                                        text: client.config.embed.footer,
+                                        icon_url: client.user.displayAvatarURL()
+                                    }
+                                }
+
+                                if(embed.fields[0].value.length > 1000) {
+                                    embed.fields[0].value = newMessage.content.slice(0, 1000) + "...";
+                                }
+
+                                newMessage.guild.channels.cache.get(data.plugins.logs.channel).send({ embed: embed });
                             }
-                        ],
-                        footer: {
-                            text: client.config.embed.footer,
-                            icon_url: client.user.displayAvatarURL()
-                        }
+                        });
                     }
-
-                    if(embed.fields[0].value.length > 1000) {
-                        embed.fields[0].value = newMessage.content.slice(0, 1000) + "...";
-                    }
-
-                    newMessage.guild.channels.cache.get(data.plugins.logs.channel).send({ embed: embed });
                 }
-            });
+            }
         }
     }
 
