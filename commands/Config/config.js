@@ -42,7 +42,7 @@ module.exports.run = (client, message, args, data) => {
                 },
                 {
                     name: "🛡️ Protection",
-                    value: `Raidmode: ${data.plugins.protection.raidmode ? enabled : disabled}  Anti-give-role: ${data.plugins.protection.antigiverole ? enabled : disabled} \nAntiban: ${data.plugins.protection.antiban ? enabled : disabled}  Antilien: ${data.plugins.protection.antilink ? enabled : disabled} \nAntimaj: ${data.plugins.protection.antimaj ? enabled : disabled} \n**Antispam** ${data.plugins.protection.antispam?.enabled ? enabled : disabled}: Salon(s) ignoré(s): ${data.plugins.protection.antispam?.ignored_channels?.length >= 1 ? data.plugins.protection.antispam.ignored_channels.map(c => `<#${c}>`).join(", ") : "`Aucun`"}`,
+                    value: `Raidmode: ${data.plugins.protection.raidmode ? enabled : disabled}  Anti-give-role: ${data.plugins.protection.antigiverole ? enabled : disabled} \nAntiban: ${data.plugins.protection.antiban ? enabled : disabled}  Antilien: ${data.plugins.protection.antilink ? enabled : disabled} \nAntimaj: ${data.plugins.protection.antimaj ? enabled : disabled} Antispam ${data.plugins.protection.antispam?.enabled ? enabled : disabled} \n**Salon(s) ignoré(s)**: ${data.plugins.protection.ignored_channels?.length >= 1 ? data.plugins.protection.ignored_channels.map(c => `<#${c}>`).join(", ") : "`Aucun`"} \n**Rôle(s) ignoré(s)**: ${data.plugins.protection.ignored_roles?.length >= 1 ? data.plugins.protection.ignored_roles.map(r => `<@&${r}>`).join(", ") : "`Aucun`"}`,
                     inline: true
                 }
             ],
