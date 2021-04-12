@@ -6,7 +6,7 @@
 const { MessageEmbed } = require("discord.js");
 
 module.exports.run = async (client, message) => {
-    if(message.author.id !== client.config.owner.id) return client.emit('ownerOnly', message);
+    if(message.author.id !== client.config.owner.id) return;
 
     let i0 = 0;
     let i1 = 10;
