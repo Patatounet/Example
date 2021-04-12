@@ -15,7 +15,7 @@ module.exports = async (client, member) => {
 
     if(data.plugins.autorole.enabled) {
         if(data.plugins.autorole.role) {
-            await member.roles.add(data.plugins.autorole.role);
+            await member.roles.add(data.plugins.autorole.role).catch(() => {});
         }
     }
 
@@ -31,6 +31,8 @@ module.exports = async (client, member) => {
     if(!data.plugins.welcome.channel) {
         await member.send(welcomeMsg).catch(() => {});
     } else {
-        member.guild.channels.cache.get(data.plugins.welcome.channel).send(welcomeMsg);
+        if(member.guild.channels.cache.get(data.plugins.welcome.channel)) {
+            member.guild.channels.cache.get(data.plugins.welcome.channel).send(welcomeMsg);
+        }
     }
 }
