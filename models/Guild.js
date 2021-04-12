@@ -24,9 +24,10 @@ module.exports = model("Guild", new Schema(
                     antilink: false,
                     antimaj: false,
                     antispam: {
-                        enabled: false,
-                        ignored_channels: []
-                    }
+                        enabled: false
+                    },
+                    ignored_channels: [],
+                    ignored_roles: []
                 },
                 welcome: {
                     enabled: false,
@@ -62,6 +63,23 @@ module.exports = model("Guild", new Schema(
                 },
                 privatechannels: {
                     channelID: null,
+                    parentID: null
+                },
+                membercount: {
+                    channels: {
+                        members: {
+                            name: null,
+                            id: null
+                        },
+                        bots: {
+                            name: null,
+                            id: null
+                        },
+                        totalMembers: {
+                            name: null,
+                            id: null
+                        }
+                    },
                     parentID: null
                 }
             }
