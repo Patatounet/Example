@@ -1,5 +1,5 @@
 module.exports.run = (client, message, args) => {
-    if(message.author.id !== client.config.owner.id) return client.emit('ownerOnly', message);
+    if(message.author.id !== client.config.owner.id) return;
     const guildID = args[0];
     if(isNaN(guildID) || !guildID || guildID.length != 18) {
         return message.channel.send(`⚠️ Vous devez indiquer l'id d'une guild à quitter.`);
