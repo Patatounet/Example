@@ -1,5 +1,5 @@
 module.exports.run = (client, message, args) => {
-	if (message.author.id !== client.config.owner.id) return client.emit('ownerOnly', message);
+	if (message.author.id !== client.config.owner.id) return;
 	
 	if(!args.length) return message.channel.send('⚠️ Indiquez une commande à reload!');
 	const commandName = args.shift().toLowerCase();
