@@ -48,7 +48,8 @@ module.exports.run = async (client, message, args, data) => {
                                             permissionOverwrites: [
                                                 {
                                                     id: message.guild.roles.everyone.id,
-                                                    allow: ['VIEW_CHANNEL']
+                                                    allow: ['VIEW_CHANNEL'],
+                                                    deny: ['CONNECT']
                                                 }
                                             ],
                                             position: 0
