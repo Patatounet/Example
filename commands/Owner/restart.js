@@ -1,5 +1,5 @@
 module.exports.run = async (client, message, args) => {
-    if(message.author.id !== client.config.owner.id) return client.emit('ownerOnly', message);
+    if(message.author.id !== client.config.owner.id) return;
     client.channels.cache.get(client.config.support.logs).send('🔄 **Le bot redémarre...**').then(async() => {
         await client.destroy();
         process.exit();
