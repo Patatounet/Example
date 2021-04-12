@@ -6,8 +6,25 @@ module.exports = async (client, channel) => {
     const data = await client.getGuild(channel.guild);
     if(!data) return;
 
-    if(await PrivateChannel.findOne({ channelID: channel.id })) {
-        await PrivateChannel.findOneAndDelete({ channelID: channel.id });
+    const pChannel = await PrivateChannel.findOne({ channelID: channel.id });
+    if(pChannel) {
+        await pChannel.delete();
+    }
+
+    if(data.plugins.membercount) {
+        Object.keys(data.plugins.membercount.channels).forEach(async (type) => {
+            const ch = data.plugins.membercount.channels[type];
+
+            if(ch.id !== channel.id) return;
+            
+            data.plugins.membercount.channels[type] = {
+                name: null,
+                id: null
+            };
+            data.markModified("plugins.membercount.channels");
+
+            await data.save();
+        });
     }
 
     if(data.plugins.logs.enabled) {
