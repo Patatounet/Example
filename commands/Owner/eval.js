@@ -4,7 +4,7 @@ const { MessageEmbed } = require("discord.js");
 module.exports.run = async (client, message, args, data, userData) => {
     if (
         message.author.id !== client.config.owner.id
-    ) return client.emit('ownerOnly', message);
+    ) return;
     const content = message.content.split(" ").slice(1).join(" ");
     if(!content) return message.channel.send('⚠️ Indiquez du code à évaluer!');
 
