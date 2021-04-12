@@ -47,129 +47,134 @@ module.exports = async (client, message) => {
     }
 
     if(data.plugins.protection.antispam?.enabled) {
-        if(!data.plugins.protection.antispam.ignored_channels.includes(message.channel.id)) {
-            if(!message.member.hasPermission("MANAGE_MESSAGES")) {
-                if(_users.has(message.author.id)) {
-                    const user = _users.get(message.author.id);
-            
-                    if(!(((message.createdTimestamp - user.lastMessage.createdTimestamp) < 3000) && user.messages.length > 5)) {
-                        user.messages.push(message);
-                        user.lastMessage = message;
-            
-                        if(user.messages.length === 4) {
-                            dbUser.warns.push({ guildID: message.guild.id, reason: 'Spam', moderator: client.user.id });
-                
-                            dbUser.markModified("warns");
-                            dbUser.save();
-            
-                            message.author.send(`Vous avez été warn pour **Spam** sur ${message.guild.name}. Si vous continuez, vous sera automatiquement rendu muet.`);
-            
-                            if(data.plugins.logs.enabled) {
-                                if(message.guild.channels.cache.get(data.plugins.logs.channel)) {
-                                    const embed = new Discord.MessageEmbed()
-                                        .setColor('ORANGE')
-                                        .setDescription(`L'utilisateur **${message.author.username}** s'est fait avertir pour **Spam**. Il possède désormais ${dbUser.warns.length} warn(s).`)
-                                        .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
-                                    message.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
-                                }
-                            }
-                        } else if(user.messages.length >= 6) {
-                            dbUser.tempmutes.push({ guildID: message.guild.id, reason: "Spam", moderator: client.user.id, duration: ms(ms(60 * 60 * 1000)), endsAt: (Date.now() + ms(60 * 60 * 1000)) });
-            
-                            dbUser.markModified("tempmutes");
-                            dbUser.save();
-            
-                            message.author.send(`Vous avez été rendu muet pendant **1h** pour **Spam** sur ${message.guild.name}.`).catch(() => {});
-    
-                            if(data.muterole) {
-                                await message.member.roles.add(data.muterole);
-                            } else {
-                                await message.guild.roles.create({
-                                    data: {
-                                        name: "Muted",
-                                        color: "#000000",
-                                        permissions: [],
-                                        position: message.guild.member(client.user).roles.highest.position,
-                                        mentionnable: false
+        if(!data.plugins.protection.ignored_channels?.includes(message.channel.id)) {
+            if(!message.member.roles.cache.array().some((role, i) => role.id === (data.plugins.protection.ignored_roles ? data.plugins.protection.ignored_roles[i] : null))) {
+                if(!message.member.hasPermission("MANAGE_MESSAGES")) {
+                    if(_users.has(message.author.id)) {
+                        const user = _users.get(message.author.id);
+
+                        if(!(((message.createdTimestamp - user.lastMessage.createdTimestamp) < 3000) && user.messages.length > 5)) {
+                            user.messages.push(message);
+                            user.lastMessage = message;
+
+                            if(user.messages.length === 4) {
+                                dbUser.warns.push({ guildID: message.guild.id, reason: 'Spam', moderator: client.user.id });
+
+                                dbUser.markModified("warns");
+                                dbUser.save();
+
+                                message.author.send(`Vous avez été warn pour **Spam** sur ${message.guild.name}. Si vous continuez, vous sera automatiquement rendu muet.`);
+
+                                if(data.plugins.logs.enabled) {
+                                    if(message.guild.channels.cache.get(data.plugins.logs.channel)) {
+                                        const embed = new Discord.MessageEmbed()
+                                            .setColor('ORANGE')
+                                            .setDescription(`L'utilisateur **${message.author.username}** s'est fait avertir pour **Spam**. Il possède désormais ${dbUser.warns.length} warn(s).`)
+                                            .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
+                                        message.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
                                     }
-                                }).then(async (muterole) => {
-                                    await client.updateGuild(message.guild, { muterole: muterole.id });
-    
-                                    message.guild.channels.cache.forEach(channel => {
-                                        if(!message.guild.me.permissionsIn(channel).has("MANAGE_CHANNELS")) return;
-                                        channel.updateOverwrite(role, {
-                                            SEND_MESSAGES: false,
-                                            ADD_REACTIONS: false,
-                                            CONNECT: false,
+                                }
+                            } else if(user.messages.length >= 6) {
+                                dbUser.tempmutes.push({ guildID: message.guild.id, reason: "Spam", moderator: client.user.id, duration: ms(ms(60 * 60 * 1000)), endsAt: (Date.now() + ms(60 * 60 * 1000)) });
+
+                                dbUser.markModified("tempmutes");
+                                dbUser.save();
+
+                                message.author.send(`Vous avez été rendu muet pendant **1h** pour **Spam** sur ${message.guild.name}.`).catch(() => {});
+
+                                if(data.muterole) {
+                                    await message.member.roles.add(data.muterole);
+                                } else {
+                                    await message.guild.roles.create({
+                                        data: {
+                                            name: "Muted",
+                                            color: "#000000",
+                                            permissions: [],
+                                            position: message.guild.member(client.user).roles.highest.position,
+                                            mentionnable: false
+                                        }
+                                    }).then(async (muterole) => {
+                                        await client.updateGuild(message.guild, { muterole: muterole.id });
+
+                                        message.guild.channels.cache.forEach(channel => {
+                                            if(!message.guild.me.permissionsIn(channel).has("MANAGE_CHANNELS")) return;
+                                            channel.updateOverwrite(role, {
+                                                SEND_MESSAGES: false,
+                                                ADD_REACTIONS: false,
+                                                CONNECT: false,
+                                            });
                                         });
-                                    });
-                        
-                                    await member.roles.add(role).then(() => {
-                                        message.channel.send(`✅ ${user} s'est fait mute par ${message.author} pour la raison suivante: **${reason}**`);
+                            
+                                        await member.roles.add(role).then(() => {
+                                            message.channel.send(`✅ ${user} s'est fait mute par ${message.author} pour la raison suivante: **${reason}**`);
+                                        }).catch(() => {});
                                     }).catch(() => {});
-                                }).catch(() => {});
-                            }
-            
-                            if(data.plugins.logs.enabled) {
-                                if(message.guild.channels.cache.get(data.plugins.logs.channel)) {
-                                    const embed = new Discord.MessageEmbed()
-                                        .setColor('ORANGE')
-                                        .setDescription(`L'utilisateur **${message.author.username}** s'est fait mute 1h pour **Spam**.`)
-                                        .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
-                                    message.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
+                                }
+
+                                if(data.plugins.logs.enabled) {
+                                    if(message.guild.channels.cache.get(data.plugins.logs.channel)) {
+                                        const embed = new Discord.MessageEmbed()
+                                            .setColor('ORANGE')
+                                            .setDescription(`L'utilisateur **${message.author.username}** s'est fait mute 1h pour **Spam**.`)
+                                            .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
+                                        message.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
+                                    }
                                 }
                             }
+
+                            setTimeout(() => user.messages.pop(), 10000);
                         }
-            
-                        setTimeout(() => user.messages.pop(), 10000);
-                    }
-            
-                } else {
-                    _users.set(message.author.id, {
-                        messages: [],
-                        lastMessage: message
-                    });
-                }       
+                    } else {
+                        _users.set(message.author.id, {
+                            messages: [],
+                            lastMessage: message
+                        });
+                    }       
+                }
             }
         }
     }
 
     if(data.plugins.protection.antimaj) {
-        if(!message.member.hasPermission('MANAGE_MESSAGES')) {
-            let text = message.content.split('');
-            let upperCaseLetters = 0;
-            const validchars = 'abcdefghigklmnopqerstuvwxyz';
+        if(!data.plugins.protection.ignored_channels?.includes(message.channel.id)) {
+            if(!message.member.roles.cache.array().some((role, i) => role.id === (data.plugins.protection.ignored_roles ? data.plugins.protection.ignored_roles[i] : null))) {
+                if(!message.member.hasPermission('MANAGE_MESSAGES')) {
+                    let text = message.content.split('');
+                    let upperCaseLetters = 0;
+                    const validchars = 'abcdefghigklmnopqerstuvwxyz';
 
-            for (let i = 0; i < text.length; i++) {
-                if (text[i] === text[i].toUpperCase() && (validchars.includes(text[i].toLowerCase()) || validchars.toUpperCase().includes(text[i].toUpperCase()))) {
-                    upperCaseLetters++
-                }
-            }
+                    for (let i = 0; i < text.length; i++) {
+                        if (text[i] === text[i].toUpperCase() && (validchars.includes(text[i].toLowerCase()) || validchars.toUpperCase().includes(text[i].toUpperCase()))) {
+                            upperCaseLetters++
+                        }
+                    }
 
-            if(text.length > 5) {
-                if(upperCaseLetters * (1000 / text.length) >= 500) {
-                    message.delete().catch(() => {});
+                    if(text.length > 5) {
+                        if(upperCaseLetters * (1000 / text.length) >= 500) {
+                            message.delete().catch(() => {});
 
-                    dbUser.warns.push({ guildID: message.guild.id, reason: 'Excessive caps', moderator: client.user.id });
+                            dbUser.warns.push({ guildID: message.guild.id, reason: 'Excessive caps', moderator: client.user.id });
 
-                    dbUser.markModified("warns");
-                    dbUser.save();
+                            dbUser.markModified("warns");
+                            dbUser.save();
 
-                    message.author.send(`Vous avez été averti sur ${message.guild.name} pour **Excessive caps**.`).catch(() => {});
+                            message.author.send(`Vous avez été averti sur ${message.guild.name} pour **Excessive caps**.`).catch(() => {});
 
-                    if(data.plugins.logs.enabled) {
-                        if(message.guild.channels.cache.get(data.plugins.logs.channel)) {
-                            const embed = new Discord.MessageEmbed()
-                                .setColor('ORANGE')
-                                .setDescription(`L'utilisateur **${message.author.username}** s'est fait avertir pour **Excessive caps**. Il possède désormais ${dbUser.warns.length} warn(s).`)
-                                .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
-                            message.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
+                            if(data.plugins.logs.enabled) {
+                                if(message.guild.channels.cache.get(data.plugins.logs.channel)) {
+                                    const embed = new Discord.MessageEmbed()
+                                        .setColor('ORANGE')
+                                        .setDescription(`L'utilisateur **${message.author.username}** s'est fait avertir pour **Excessive caps**. Il possède désormais ${dbUser.warns.length} warn(s).`)
+                                        .setFooter(client.config.embed.footer, client.user.displayAvatarURL());
+                                    message.guild.channels.cache.get(data.plugins.logs.channel).send(embed);
+                                }
+                            }
                         }
                     }
                 }
             }
         }
-    }
+    }    
 
     if(data.plugins.levels.enabled) {
         if(!(_cooldowns[message.author.id] > Date.now())) {
@@ -240,36 +245,40 @@ module.exports = async (client, message) => {
     }
 
     if(data.plugins.protection.antilink) {
-        if(/discord(?:(?:app)?\.com\/invite|\.gg(?:\/invite)?)\/([\w-]{2,255})/i.test(message.content)) {
-            if(!message.guild.member(message.author).hasPermission("MANAGE_MESSAGES")) {
-                return message.delete().then(() => {
-                    if(data.plugins.logs.enabled && data.plugins.logs.channel) {
-                        let embed = {
-                            color: 'RED',
-                            author: {
-                                name: message.author.username,
-                                icon_url: message.author.displayAvatarURL({ dynamic: true })
-                            },
-                            description: `${message.author} a envoyé une pub dans ${message.channel}!`,
-                            fields: [
-                                {
-                                    name: "Message d'origine",
-                                    value: message.content
+        if(!data.plugins.protection.ignored_channels?.includes(message.channel.id)) {
+            if(!message.member.roles.cache.array().some((role, i) => role.id === (data.plugins.protection.ignored_roles ? data.plugins.protection.ignored_roles[i] : null))) {
+                if(/discord(?:(?:app)?\.com\/invite|\.gg(?:\/invite)?)\/([\w-]{2,255})/i.test(message.content)) {
+                    if(!message.guild.member(message.author).hasPermission("MANAGE_MESSAGES")) {
+                        return message.delete().then(() => {
+                            if(data.plugins.logs.enabled && data.plugins.logs.channel) {
+                                const embed = {
+                                    color: 'RED',
+                                    author: {
+                                        name: message.author.username,
+                                        icon_url: message.author.displayAvatarURL({ dynamic: true })
+                                    },
+                                    description: `${message.author} a envoyé une pub dans ${message.channel}!`,
+                                    fields: [
+                                        {
+                                            name: "Message d'origine",
+                                            value: message.content
+                                        }
+                                    ],
+                                    footer: {
+                                        text: client.config.embed.footer,
+                                        icon_url: client.user.displayAvatarURL()
+                                    }
                                 }
-                            ],
-                            footer: {
-                                text: client.config.embed.footer,
-                                icon_url: client.user.displayAvatarURL()
+
+                                if(embed.fields[0].value.length > 1000) {
+                                    embed.fields[0].value = message.content.slice(0, 1000) + "...";
+                                }
+
+                                message.guild.channels.cache.get(data.plugins.logs.channel).send({ embed });
                             }
-                        }
-
-                        if(embed.fields[0].value.length > 1000) {
-                            embed.fields[0].value = message.content.slice(0, 1000) + "...";
-                        }
-
-                        message.guild.channels.cache.get(data.plugins.logs.channel).send({ embed: embed });
+                        });
                     }
-                });
+                }
             }
         }
     }
