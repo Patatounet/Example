@@ -1,23 +1,27 @@
 module.exports.run = async (client, message, args, data) => {
     const channel = message.mentions.channels.first() || message.guild.channels.cache.get(args[1]);
 
-    if(!data.plugins.protection.antispam?.enabled) return message.channel.send(`⚠️ L'anti spam n'est pas activé, faites \`${data.prefix}antispam\` pour l'activer`);
-
     if(args[0] === "add") {
         if(!channel) return message.channel.send(`⚠️ Merci de spécifier un salon à ignorer, essayez en donnant une ID ou en mentionnant le salon`);
 
-        data.plugins.protection.antispam.ignored_channels.push(channel.id);
+        if(!data.plugins.protection.ignored_channels) {
+            data.plugins.protection.ignored_channels = [channel.id];
+        } else {
+            data.plugins.protection.ignored_channels.push(channel.id);
+        }
 
-        data.markModified("plugins.protection.antispam");
+        data.markModified("plugins.protection");
         data.save();
 
-        message.channel.send(`✅ Le salon ${channel} est désormais ignoré par l'anti spam.`);
+        message.channel.send(`✅ Le salon ${channel} sera désormais ignoré par le système de protection.`);
     } else if(args[0] === "remove") {
         if(!channel) return message.channel.send(`⚠️ Merci de spécifier un salon à ignorer, essayez en donnant une ID ou en mentionnant le salon`);
 
-        data.plugins.protection.antispam.ignored_channels = data.plugins.protection.antispam.ignored_channels.filter(c => c !== channel.id);
+        if(!data.plugins.protection.ignored_channels?.includes(channel.id)) return message.channel.send('⚠️ Ce salon n\'est pas ignoré par le système de protection.');
 
-        data.markModified("plugins.protection.antispam");
+        data.plugins.protection.ignored_channels = data.plugins.protection.ignored_channels.filter((c) => c !== channel.id);
+
+        data.markModified("plugins.protection");
         data.save();
 
         message.channel.send(`✅ Le salon ${channel} n'est désormais plus ignoré par l'antispam`);
