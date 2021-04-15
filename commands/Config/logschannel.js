@@ -5,10 +5,8 @@ module.exports.run = async (client, message, args, data) => {
 
     if(args.length) {
         const channel = message.mentions.channels.first() || message.guild.channels.cache.get(args[0]);
-        if(!channel) return message.channel.send('⚠️ Ce salon n\'existe pas, vérifiez que j\'ai accès au salon.');
-
+        if(!channel || !message.guild.channels.resolve(channel)) return message.channel.send('⚠️ Ce salon n\'existe pas, vérifiez que j\'ai accès au salon.');
         if(channel.type != "text") return message.channel.send('⚠️ Merci de donner un salon textuel. Je ne peux envoyer les messages de logs que dans un salon textuel (exclu salon d\'annonce)');
-
         if(!message.guild.me.permissionsIn(channel).has('SEND_MESSAGES') || !message.guild.me.permissionsIn(channel).has('EMBED_LINKS')) return message.channel.send('⚠️ Je n\'ai pas les permissions de parler dans ce salon, mettez moi les permissions Envoyer des messages et Intégrer des liens dans le salon.');
 
         message.delete().catch(() => {});

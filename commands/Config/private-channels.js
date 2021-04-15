@@ -8,7 +8,7 @@ module.exports.run = async (client, message, args, data) => {
                 channel = null;
             } else {
                 channel = collected.first().mentions.channels.first() || message.guild.channels.cache.get(collected.first()?.content);
-                if(!channel) return message.channel.send('⚠️ Ce salon n\'existe pas, vérifiez que j\'ai accès au salon.');
+                if(!channel || !message.guild.channels.resolve(channel)) return message.channel.send('⚠️ Ce salon n\'existe pas, vérifiez que j\'ai accès au salon.');
                 if(channel.type !== 'voice') return message.channel.send('⚠️ Merci de spécifier un salon vocal uniquement.');
             }
 

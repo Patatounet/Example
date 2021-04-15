@@ -5,13 +5,9 @@ module.exports.run = (client, message, args, data) => {
 
     if(args.length) {
         const newChannel = message.mentions.channels.first() || message.guild.channels.cache.get(args[0]);
-
-        if(!newChannel) return message.channel.send('⚠️ Ce salon n\'existe pas.');
-
+        if(!newChannel || !message.guild.channels.resolve(newChannel)) return message.channel.send('⚠️ Ce salon n\'existe pas.');
         if(newChannel.type !== "text") return message.channel.send('⚠️ Le salon de suggestion ne peut être uniquement un salon textuel.');
-
         if(!message.member.permissionsIn(newChannel).has("MANAGE_CHANNELS")) return message.channel.send('⚠️ Vous devez avoir la permission Gérer les salons dans le salon pour faire cette action.');
-
         if(!message.guild.me.permissionsIn(newChannel).has("EMBED_LINKS")) return message.channel.send('⚠️ Je n\'ai pas les permissions suffisantes dans ce salon. Vérifiez que j\'ai bien la permission Intégrer dans lien dans celui-ci !');
 
         if(newChannel.id == data.plugins.suggestion.channel) return message.channel.send('⚠️ Ce salon est le même que celui actuellement défini.');
