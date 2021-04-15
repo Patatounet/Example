@@ -4,6 +4,7 @@ module.exports.run = async (client, message, args, data) => {
             return message.channel.send(`⚠️ Les salons compteur de membre existent déjà ! Faites \`${data.prefix}membercount delete\` pour le retirer`);
         } else {
             try {
+                if(message.guild.channels.cache.size >= 496) return message.channel.send('⚠️ Vous avez atteint la limite de salon (500). Je ne peux pas en créer tant qu\'il y en a plus que 496.');
                 if(message.guild.memberCount !== message.guild.members.cache.size) await message.guild.members.fetch();
 
                 const prompts = [
@@ -48,8 +49,7 @@ module.exports.run = async (client, message, args, data) => {
                                             permissionOverwrites: [
                                                 {
                                                     id: message.guild.roles.everyone.id,
-                                                    allow: ['VIEW_CHANNEL'],
-                                                    deny: ['CONNECT']
+                                                    allow: ['VIEW_CHANNEL']
                                                 }
                                             ],
                                             position: 0
