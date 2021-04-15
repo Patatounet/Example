@@ -4,11 +4,17 @@ module.exports.run = async (client, message, args, data) => {
     if(!data.plugins.goodbye.enabled) return message.channel.send(`⚠️ Le plugin d'aurevoir n'est pas activé. Faites \`${data.prefix}enable goodbye\` pour l'activer!`);
 
     if(args[0] === "channel") {
-        if(args[1] && (message.mentions.channels.first() || message.guild.channels.cache.get(args[1]))) {
+        const ch = message.mentions.channels.first() || message.guild.channels.cache.get(args[1]);
+        if(args[1] && ch) {
+            if(!message.guild.channels.resolve(ch)) return message.channel.send('⚠️ Ce salon n\'existe pas, vérifiez que j\'ai accès au salon.');
+            if(ch.type != "text") return message.channel.send('⚠️ Merci de donner un salon de type textuel. Les salons d\'annonces ne sont pas acceptés.');
+            if(ch.id == data.plugins.goodbye.channel) return message.channel.send('⚠️ Ce salon est déjà défini comme salon d\'aurevoir!');
+            if(!message.guild.me.permissionsIn(ch).has('SEND_MESSAGES')) return message.channel.send('⚠️ Je n\'ai pas les permissions de parler dans ce salon, mettez moi la permission Envoyer des messages dans le salon.');
+
             data.plugins.goodbye = {
                 enabled: true,
                 message: data.plugins.goodbye.message,
-                channel: message.mentions.channels.first() || message.guild.channels.cache.get(args[1])
+                channel: ch.id
             }
 
             data.markModified("plugins.goodbye");
@@ -28,11 +34,8 @@ module.exports.run = async (client, message, args, data) => {
             c.on("collect", async msg => {
                 const channel = msg.mentions.channels.first() || msg.guild.channels.cache.get(msg.content);
                 if(!channel) return message.channel.send('⚠️ Ce salon n\'existe pas, vérifiez que j\'ai accès au salon.');
-    
                 if(channel.type != "text") return message.channel.send('⚠️ Merci de donner un salon de type textuel. Les salons d\'annonces ne sont pas acceptés.');
-    
                 if(channel.id == data.plugins.goodbye.channel) return message.channel.send('⚠️ Ce salon est déjà défini comme salon d\'aurevoir!');
-    
                 if(!message.guild.me.permissionsIn(channel).has('SEND_MESSAGES')) return message.channel.send('⚠️ Je n\'ai pas les permissions de parler dans ce salon, mettez moi la permission Envoyer des messages dans le salon.');
     
                 c.stop(true);
