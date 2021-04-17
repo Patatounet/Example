@@ -11,11 +11,8 @@ module.exports.run = async (client, message, args, data) => {
             if(ch.id == data.plugins.welcome.channel) return message.channel.send('⚠️ Ce salon est déjà défini comme salon de bienvenue!');
             if(!message.guild.me.permissionsIn(ch).has('SEND_MESSAGES')) return message.channel.send('⚠️ Je n\'ai pas les permissions de parler dans ce salon, mettez moi la permission Envoyer des messages dans le salon.');
 
-            data.plugins.welcome = {
-                enabled: true,
-                message: data.plugins.welcome.message,
-                channel: ch.id
-            }
+            data.plugins.welcome.channel = ch.id;
+            
 
             data.markModified("plugins.welcome");
             data.save();
@@ -43,11 +40,7 @@ module.exports.run = async (client, message, args, data) => {
                 MSG.delete().catch(() => {});
                 msg1.delete().catch(() => {});
 
-                data.plugins.welcome = {
-                    enabled: true,
-                    message: data.plugins.welcome.message,
-                    channel: channel.id
-                }
+                data.plugins.welcome.channel = channel.id;
 
                 data.markModified("plugins.welcome");
                 data.save();
@@ -60,18 +53,23 @@ module.exports.run = async (client, message, args, data) => {
                 if(reason === "time") return message.channel.send('Temps écoulé');
             });
         }
-    } else if(args[0] === "message") {
-        if(args[1]) {
+    } else if(args[0] === 'message') {
+        if(args[1]?.toLowerCase() === 'remove') {
+            if(!data.plugins.welcome.message) return message.channel.send('⚠️ Le message de bienvenue est déjà désactivé.');
+
+            data.plugins.welcome.message = null;
+
+            data.markModified("plugins.welcome.message");
+            data.save();
+
+            message.channel.send('✅ Le message de bienvenue a bien été retiré');
+        } else if(args[1]) {
             const newMessage = args.slice(1).join(" ");
             if(newMessage.length < 5) return message.channel.send('⚠️ Le message de bienvenue doit faire plus de 5 caractères !');
 
             if(newMessage === data.plugins.welcome.message) return message.channel.send('⚠️ Ce message est le même que celui actuellement défini 🤔');
 
-            data.plugins.welcome = {
-                enabled: true,
-                message: newMessage,
-                channel: data.plugins.welcome.channel
-            }
+            data.plugins.welcome.message = newMessage;
 
             data.markModified("plugins.welcome");
             data.save();
@@ -99,11 +97,7 @@ module.exports.run = async (client, message, args, data) => {
                 MSG.delete().catch(() => {});
                 msg1.delete().catch(() => {});
 
-                data.plugins.welcome = {
-                    enabled: true,
-                    message: newMessage,
-                    channel: data.plugins.welcome.channel
-                }
+                data.plugins.welcome.message = newMessage;
 
                 data.markModified("plugins.welcome");
                 data.save();
@@ -116,20 +110,52 @@ module.exports.run = async (client, message, args, data) => {
                 if(reason === "time") return message.channel.send('Temps écoulé');
             });
         }
+    } else if(args[0] === 'image') {
+        if(data.plugins.welcome.image) {
+            data.plugins.welcome.image = false;
+
+            data.markModified("plugins.welcome.image");
+            data.save();
+    
+            message.channel.send('✅ Le bot n\'enverra plus d\'image de bienvenue aux nouveaux membres.');
+        } else {
+            data.plugins.welcome.image = true;
+
+            data.markModified("plugins.welcome.image");
+            data.save();
+
+            message.channel.send(`✅ Le bot enverra désormais une image de bienvenue aux nouveaux membres.\nFaites \`${data.prefix}welcome message remove\` pour retirer le texte de bienvenue et \`${data.prefix}welcome test\`pour tester!`);
+        }
     } else if(args[0] === "test") {
-        if(!data.plugins.welcome.channel) return message.channel.send('Aucun salon de bienvenue n\'est défini. Faites `' + data.prefix + 'welcome channel` pour le configurer!');
+        if(!data.plugins.welcome.channel) return message.channel.send('⚠️ Aucun salon de bienvenue n\'est défini. Faites `' + data.prefix + 'welcome channel` pour le configurer!');
+
+        if(!data.plugins.welcome.message && !data.plugins.welcome.image) return message.channel.send('⚠️ Vous n\'avez pas de message ni d\'image de bienvenue configurés.');
 
         let welcomeMsg = data.plugins.welcome.message
-            .replace('{user}', message.author)
+            ?.replace('{user}', message.author)
             .replace('{guildName}', message.guild.name)
             .replace('{memberCount}', message.guild.memberCount)
             .replace('{username}', message.author.username)
             .replace('{usertag}', message.author.tag);
 
-        message.guild.channels.cache.get(data.plugins.welcome.channel).send(welcomeMsg);
+        welcomeMsg && data.plugins.welcome.image
+            ? message.guild.channels.cache.get(data.plugins.welcome.channel).send(welcomeMsg, {
+                    files: [{
+                        attachment: await client.generateWelcomeCard(message.member)
+                    }]
+                })
+            : welcomeMsg && !data.plugins.welcome.image
+            ?  message.guild.channels.cache.get(data.plugins.welcome.channel).send(welcomeMsg)
+            : !welcomeMsg && data.plugins.welcome.image
+            ? message.guild.channels.cache.get(data.plugins.welcome.channel).send({
+                    files: [{
+                        attachment: await client.generateWelcomeCard(message.member)
+                    }]
+                })
+            : undefined
         return message.channel.send('Test effectué, allez voir ça dans <#' + data.plugins.welcome.channel + '> !');
     } else {
-        message.channel.send(`⚠️ Vous n'utilisez pas la commande correctement.\nFaites \`${data.prefix}welcome <channel | message | test>\``);
+        message.channel.send(`⚠️ Vous n'utilisez pas la commande correctement.\nFaites \`${data.prefix}welcome <channel | message | image | test>\``);
     }
 }
 
@@ -137,8 +163,8 @@ module.exports.help = {
     name: "welcome",
     aliases: ["welcome"],
     category: 'Config',
-    description: "Modifier le message ou le salon de bienvenue",
-    usage: "<message | channel | test>",
+    description: "Modifier le message, l'image ou le salon de bienvenue",
+    usage: "<message | channel | image | test>",
     cooldown: 5,
     memberPerms: ["MANAGE_GUILD"],
     botPerms: ["EMBED_LINKS"],
