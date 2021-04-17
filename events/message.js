@@ -300,7 +300,7 @@ module.exports = async (client, message) => {
 
     if(command.help.memberPerms.length > 0) {
         if(!message.member.permissionsIn(message.channel).has(command.help.memberPerms)) {
-            return message.channel.send(`⚠️ ${message.author}, vous n\'avez les permissions nécessaires pour faire cette commande!`);
+            return message.channel.send(`⚠️ ${message.author}, vous n\'avez pas les permissions nécessaires pour faire cette commande!`);
         }
     }
 
