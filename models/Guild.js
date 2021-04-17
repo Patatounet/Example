@@ -32,11 +32,13 @@ module.exports = model("Guild", new Schema(
                 welcome: {
                     enabled: false,
                     message: config.defaultsSettings.welcomeMessage,
+                    image: false,
                     channel: null
                 },
                 goodbye: {
                     enabled: false,
                     message: config.defaultsSettings.goodbyeMessage,
+                    image: false,
                     channel: null
                 },
                 logs: {

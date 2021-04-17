@@ -1,7 +1,7 @@
 module.exports.run = async (client, message, args) => {
-    const user = message.mentions.users.first() || client.users.cache.get(args[0]) || client.users.cache.find(u => u.username.toLowerCase().includes(args[0]?.toLowerCase())) || message.author;
+    const user = message.mentions.users.first() || client.users.cache.get(args[0]) || client.users.cache.find((u) => u.username.toLowerCase().includes(args[0]?.toLowerCase())) || message.author;
 
-    if(!user || !message.guild.member(user)) return message.channel.send('⚠️ Cet utilisateur n\'existe pas !');
+    if(!message.guild.member(user)) return message.channel.send('⚠️ Cette personne n\'est pas sur le serveur!');
 
 	message.channel.send({ 
         embed: {
@@ -9,7 +9,7 @@ module.exports.run = async (client, message, args) => {
             title: `Avatar de ${user.username}`,
 		    image: {
 			    url: user.displayAvatarURL({ size: 512, dynamic: true })
-		    },
+		    }
         }
     });
 }
