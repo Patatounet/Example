@@ -22,7 +22,7 @@ module.exports = async (client, member) => {
     if(!data.plugins.welcome.enabled) return;
 
     let welcomeMsg = data.plugins.welcome.message
-        .replace('{user}', member)
+        ?.replace('{user}', member)
         .replace('{guildName}', member.guild.name)
         .replace('{memberCount}', member.guild.memberCount)
         .replace('{username}', member.user.username)
@@ -32,7 +32,21 @@ module.exports = async (client, member) => {
         await member.send(welcomeMsg).catch(() => {});
     } else {
         if(member.guild.channels.cache.get(data.plugins.welcome.channel)) {
-            member.guild.channels.cache.get(data.plugins.welcome.channel).send(welcomeMsg);
+            welcomeMsg && data.plugins.welcome.image
+            ? member.guild.channels.cache.get(data.plugins.welcome.channel).send(welcomeMsg, {
+                    files: [{
+                        attachment: await client.generateWelcomeCard(member)
+                    }]
+                })
+            : welcomeMsg && !data.plugins.welcome.image
+            ? member.guild.channels.cache.get(data.plugins.welcome.channel).send(welcomeMsg)
+            : !welcomeMsg && data.plugins.welcome.image
+            ? member.guild.channels.cache.get(data.plugins.welcome.channel).send({
+                    files: [{
+                        attachment: await client.generateWelcomeCard(member)
+                    }]
+                })
+            : undefined
         }
     }
 }
