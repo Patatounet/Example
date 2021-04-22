@@ -37,13 +37,8 @@ class Hand {
 
     get score() {
         let score = 0;
-        let as = 0;
 
         this.cards.forEach(card => {
-            if(card.face == "A") {
-                as++;
-            }
-
             if (card.face == "J" || card.face == "Q" || card.face == "K") {
                 score += 10;
             } else if (card.face == "A") {
@@ -61,7 +56,7 @@ class Hand {
     }
 
     toString() {
-        var string = "";
+        let string = "";
 
         this.cards.forEach(card => {
           string += `${card.face} ${card.suite}\n`;
