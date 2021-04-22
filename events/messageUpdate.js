@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const Guild = require('../models/Guild');
 
 module.exports = async (client, oldMessage, newMessage) => {
+    if(!newMessage.author) return;
     if(newMessage.channel.type === "dm" || newMessage.author.bot) return;
     if(oldMessage.content == newMessage.content) return;
 

@@ -1,7 +1,8 @@
 module.exports = class RainsBot extends Client {
     constructor() {
         super({
-            disableMentions: "everyone"
+            disableMentions: "everyone",
+            partials: ['MESSAGE', 'CHANNEL', 'REACTION']
         });
 
         this.config = require('../config');
@@ -9,7 +10,7 @@ module.exports = class RainsBot extends Client {
         this.games = [];
         this.commands = new Collection();
         this.cooldowns = new Collection();
-        this.giveawaysManager = new GiveawaysManager(this, {
+        this.giveawaysManager = new (require('discord-giveaways').GiveawaysManager)(this, {
             storage: "../giveaways.json",
             updateCountdownEvery: 10000,
             default: {
