@@ -46,6 +46,8 @@ module.exports = async (client, message) => {
         });
     }
 
+    if(typeof message.content !== 'string') return;
+
     if(data.plugins.protection.antispam?.enabled) {
         if(!data.plugins.protection.ignored_channels?.includes(message.channel.id)) {
             if(!message.member.roles.cache.array().some((role, i) => role.id === (data.plugins.protection.ignored_roles ? data.plugins.protection.ignored_roles[i] : null))) {
