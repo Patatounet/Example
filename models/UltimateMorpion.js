@@ -54,11 +54,10 @@ module.exports = class Morpion extends Game {
     }
 
     checkWin(board) {
-        const checkSquare = this.checkSquare;
         const results = [];
 
         for (let i = 0; i < board.length; i++) {
-            results.push(checkSquare(board[i]))
+            results.push(this.checkSquare(board[i]))
         }
 
         function check(a, b, c) {
@@ -68,7 +67,7 @@ module.exports = class Morpion extends Game {
 
         function checkHorizontal() {
             if(results.slice(0, 3).every((result) => result === results[0] && result !== 'égalité')) return results[0];
-            if(results.slice(4, 6).every((result) => result === results[0] && result !== 'égalité')) return results[0];
+            if(results.slice(3, 6).every((result) => result === results[0] && result !== 'égalité')) return results[0];
             if(results.slice(6).every((result) => result === results[0] && result !== 'égalité')) return results[0];
             return false;
         }
@@ -77,9 +76,9 @@ module.exports = class Morpion extends Game {
             for (let i = 0; i < 3; i++) {
                 const vertical = check(results[i], results[i + 3], results[i + 6]);
                 if(vertical) return vertical;
-
-                return false;
             }
+
+            return false;
         }
 
         const horizontal = checkHorizontal();
