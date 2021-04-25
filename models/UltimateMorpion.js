@@ -1,6 +1,6 @@
 const Game = require('./Game');
 
-module.exports = class Morpion extends Game {
+module.exports = class UltimateMorpion extends Game {
     constructor(challenger, opponent) {
         super(challenger, opponent);
 
@@ -81,12 +81,22 @@ module.exports = class Morpion extends Game {
             return false;
         }
 
+        function checkDiagonal() {
+            const result1 = check(results[0], results[4], results[8]);
+            if(result1) return result1;
+            const result2 = check(results[2], results[4], results[6]);
+            if(result2) return result2;
+            return false;
+        }
+
         const horizontal = checkHorizontal();
         const vertical = checkVertical();
+        const diagonal = checkDiagonal();
 
-        if(results.every((result) => result !== false) && !horizontal && !vertical) return 'égalité';
+        if(results.every((result) => result !== false) && !horizontal && !vertical && !diagonal) return 'égalité';
         if(horizontal) return horizontal;
         if(vertical) return vertical;
+        if(diagonal) return diagonal;
         return false;
     }
 
