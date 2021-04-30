@@ -6,7 +6,7 @@ module.exports.run = async (client, message, args, data) => {
     const user = await client.findOrCreateUser(message.author);
     if(!user) return message.channel.send('❌ Votre compte en banque n\'était pas créé, veuillez réessayer.');
 
-    if(user.cooldowns.daily > Date.now()) return message.channel.send(`❌ Vous avez déjà récupéré votre récompense hebdomadaire, réessayez dans **${ms(user.cooldowns.daily - Date.now())}**.`);
+    if(user.cooldowns.daily > Date.now()) return message.channel.send(`❌ Vous avez déjà récupéré votre récompense journalière, réessayez dans **${ms(user.cooldowns.daily - Date.now())}**.`);
 
     const winned = Math.floor(Math.random() * (5000 - 500 + 1)) + 500;
 
@@ -23,7 +23,7 @@ module.exports.help = {
     name: "daily",
     aliases: ["daily"],
     category: "Economy",
-    description: "Récupérer sa récompense journalière",
+    description: "Récupérer sa récompense journalière.",
     usage: "",
     cooldown: 5,
     memberPerms: [],
