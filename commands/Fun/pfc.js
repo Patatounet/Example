@@ -43,11 +43,13 @@ module.exports.run = async (client, message, args) => {
             return message.channel.send(`⚠️ Vous devez préciser l\'une des possibilités suivantes: ${Object.keys(attacks).map((a) => `\`${a}\``)}.`);
         }
     } else {
+        if(member.user.bot) return message.channel.send('⚠️ Tu ne peux pas jouer avec un bot ! Et ce ne sera sûrement jamais possible...');
+        if(member.id === message.author.id) return message.channel.send('⚠️ Non, tu ne peux pas jouer avec toi même, réfléchis un peu.');
         const embed = {
             color: client.config.embed.color,
             description: 'Cliquez sur la réaction ✅ lorsque vous êtes prêts !'
         };
-        const msg = await message.channel.send({ embed });
+        const msg = await message.channel.send(member, { embed });
         const rArr = ['✅', '❌'];
         rArr.forEach(async (r) => await msg.react(r));
 
