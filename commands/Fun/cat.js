@@ -1,12 +1,8 @@
-const fetch = require('node-fetch');
-const emojis = require('../../emojis');
+const cats = require('../../assets/cats.json');
 
 module.exports.run = async (client, message) => {
-    let msg = await message.channel.send(`Chargement de l'image... ${emojis.chargement}`);
-
-    const cat = await fetch("https://api.thecatapi.com/v1/images/search")
-        .then(res => res.json())
-        .then(json => json[0].url);
+    const cat = cats[Math.floor(Math.random() * cats.length)];
+    if(!cat) return message.channel.send('⚠️ Une erreur est survenue, veuillez réessayer.');
 
     message.channel.send({
         embed: {
@@ -21,7 +17,6 @@ module.exports.run = async (client, message) => {
             }
         }
     });
-    await msg.delete().catch(() => {});
 }
 
 module.exports.help = {
@@ -30,7 +25,7 @@ module.exports.help = {
     category: "Fun",
     description: "Envoie une image de chat aléatoire !",
     usage: "",
-    cooldown: 5,
+    cooldown: 2,
     memberPerms: [],
     botPerms: ["EMBED_LINKS"],
     args: false
