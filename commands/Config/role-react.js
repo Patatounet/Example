@@ -1,7 +1,7 @@
 const { Message } = require('discord.js');
 const RolesReactions = require('../../models/RolesReactions');
 
-module.exports.run = async (client, message, args) => {
+module.exports.run = async (client, message) => {
     const data = await RolesReactions.find({ guildID: message.guild.id });
     const action = await message.channel.send('Voulez-vous `créer`, `ajouter` ou `supprimer` un rôle réaction ?');
     const filter = (m) => m.author.id === message.author.id;
@@ -15,7 +15,7 @@ module.exports.run = async (client, message, args) => {
             collectedAction.first().delete().catch(() => {});
 
             if(['créer', 'creer', 'crér', 'crer', 'create'].includes(content)) {
-                if(data.length >= 4) return message.channel.send('⚠️ Vous avez atteint la limite de 4 panels de rôles réactions. Pour mettre plusieurs rôles réactions sur un panel, utilisez `ajouter`.');
+                if(data.length >= 10) return message.channel.send('⚠️ Vous avez atteint la limite de 10 panels de rôles réactions. Pour mettre plusieurs rôles réactions sur un panel, utilisez `ajouter`.');
 
                 await askForRoleReact('create', async (role, emoji) => {
                     const msg = await message.channel.send({
@@ -119,7 +119,7 @@ module.exports.run = async (client, message, args) => {
 
                                     const msg = await message.channel.messages.fetch(id).catch(() => {})
                                     if(!data.find((doc) => doc.messageID === id) || !(msg instanceof Message)) return message.channel.send('⚠️ Aucun rôle réaction trouvé avec cet ID.');
-                                    if(data.find((doc) => doc.messageID === id).roles_react.length >= 10) return message.channel.send('⚠️ Vous avez atteint la limite de 10 rôles réactions par panel!');
+                                    if(data.find((doc) => doc.messageID === id).roles_react.length >= 15) return message.channel.send('⚠️ Vous avez atteint la limite de 15 rôles réactions par panel!');
 
                                     three.delete().catch(() => {});
                                     collectedMsg.first().delete().catch(() => {});
