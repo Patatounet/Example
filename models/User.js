@@ -42,8 +42,13 @@ module.exports = model("User", new Schema(
             default: {
                 progress_bar_color: "#0F7FBB",
                 text_color: "#0F7FBB",
-                avatar_color: "#ffffff"
+                avatar_color: "#ffffff",
+                background: null
             }
+        },
+        uno_played: {
+            type: Array,
+            default: []
         }
     }
-))
+));
