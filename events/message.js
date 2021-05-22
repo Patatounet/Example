@@ -5,13 +5,13 @@ let _cooldowns = {};
 let _users = new Map();
 
 module.exports = async (client, message) => {
-    if(message.channel.type === "dm" || message.author.bot) return;
+    if(message.channel.type === 'dm' || message.author.bot) return;
 
     if(!message.member) await message.guild.members.fetch(message.author.id);
     if(message.member === null) return;
 
     if(message.content.includes(client.token)) {
-        return message.delete().then(() => client.users.cache.get(client.config.owner.id).send("Tu devrais regen ton token. C'est juste un conseil."));
+        return message.delete().then(() => client.users.cache.get(client.config.owner.id).send('Tu devrais regen ton token. C\'est juste un conseil.'));
     }
 
     const dbUser = await client.findOrCreateUser(message.author);
@@ -289,10 +289,53 @@ module.exports = async (client, message) => {
 
     const args = message.content.slice(prefix.length).split(/ +/);
     const commandName = args.shift().toLowerCase();
+    const customCommand = (await require('../models/Command').find({ guildID: message.guild.id })).filter((cmd) => cmd.name.toLowerCase() === commandName)?.[0];
     const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.help.aliases && cmd.help.aliases.includes(commandName));
-    if(!command) return;
+    if(!command && !customCommand) return;
 
-    if(!message.guild.me.permissionsIn(message.channel).has("SEND_MESSAGES") || !message.guild.me.permissionsIn(message.channel).has("READ_MESSAGE_HISTORY")) return;
+    if(!message.guild.me.permissionsIn(message.channel).has(['SEND_MESSAGES', 'READ_MESSAGE_HISTORY'])) return;
+
+    if(customCommand) {
+        const {
+            enabled,
+            content,
+            embed,
+            image,
+            whitelisted_members,
+            whitelisted_roles,
+            whitelisted_channels
+        } = customCommand;
+
+        if(!enabled) return;
+        if(whitelisted_members && !message.member.permissions.has(['ADMINISTRATOR', 'MANAGE_GUILD']) && !whitelisted_members.includes(message.author.id)) return message.channel.send('⚠️ Vous ne pouvez pas utiliser cette commande !');
+        if(whitelisted_roles && !message.member.permissions.has(['ADMINISTRATOR', 'MANAGE_GUILD']) && !whitelisted_roles.some((r) => message.member.roles.cache.has(r))) return message.channel.send('⚠️ Vous ne pouvez pas utiliser cette commande !');
+        if(whitelisted_channels && !whitelisted_channels.includes(message.channel.id)) return;
+
+        if(embed) {
+            embed.timestamp = new Date;
+            embed.footer = { text: message.author.tag, icon_url: message.author.displayAvatarURL({ dynamic: true }) };
+
+            if(image) {
+                return message.channel.send(parseContent(), { embed, files: [{ attachment: image, name: 'image.png' }] });
+            } else {
+                return message.channel.send(parseContent(), { embed });
+            }
+        } else if(image) {
+            return message.channel.send(parseContent(), { files: [{ attachment: image, name: 'image.png' }] });
+        } else if(content) {
+            return message.channel.send(parseContent());
+        } else {
+            return;
+        }
+
+        function parseContent() {
+            return content
+                ?.replace(/{author}/g, message.author)
+                .replace(/{authorname}/g, message.author.username)
+                .replace(/{authortag}/g, message.author.tag)
+                .replace(/{channel}/g, message.channel);
+        }
+    }
 
     if(command.help.botPerms.length > 0) {
         if(!message.guild.me.permissionsIn(message.channel).has(command.help.botPerms)) {
@@ -307,20 +350,7 @@ module.exports = async (client, message) => {
     }
 
     if(command.help.args && !args.length) {
-        return message.channel.send({
-            embed: {
-                color: "#FF0000",
-                author: {
-                    name: message.author.username,
-                    icon_url: message.author.displayAvatarURL({ dynamic: true })
-                },
-                description: `⚠️ Vous n'utilisez pas la commande correctement. \nFaites **${data.prefix}help ${commandName}** pour voir comment l'utiliser.`,
-                footer: {
-                    text: client.config.embed.footer,
-                    icon_url: client.user.displayAvatarURL()
-                }
-            }
-        })
+        return client.commands.get('help').run(client, message, [command.help.name], data);
     }
 
     if(!client.cooldowns.has(command.help.name)) {
