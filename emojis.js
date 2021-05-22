@@ -12,6 +12,10 @@ module.exports = {
     partner: "<:partner:784756429293879336>",
     disabled: "<:disabled_plugin:828677039338422322>",
     enabled: "<:enabled_plugin:828676868176740403>",
+    join: "<:join:839160370920030299>",
+    leave: "<:leave:839160276657635348>",
+    yes: "<:yes:839170531906814022>",
+    no: "<:no:839170641298980884>",
     categories: {
         Config: "🛠️",
         Economy: "💵",
@@ -21,7 +25,8 @@ module.exports = {
         Levels: "🥇",
         Moderation: "⚒️",
         Owner: "👑",
-        Protection: "🛡️"
+        Protection: "🛡️",
+        Tickets: "🎫"
     },
     numbers: {
         11: "<:11:834864046561951864>",
@@ -95,5 +100,5 @@ module.exports = {
         79: "<:79:834840629828911125>",
         80: "<:80:834840448576127009>",
         81: "<:81:834840348118220800>",
-    }
+    },
 }
