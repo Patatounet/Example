@@ -17,11 +17,11 @@ module.exports.run = async (client, message) => {
             if(['créer', 'creer', 'crér', 'crer', 'create'].includes(content)) {
                 if(data.length >= 10) return message.channel.send('⚠️ Vous avez atteint la limite de 10 panels de rôles réactions. Pour mettre plusieurs rôles réactions sur un panel, utilisez `ajouter`.');
 
-                await askForRoleReact('create', async (role, emoji) => {
+                await askForRoleReact('create', async (role, emoji, title) => {
                     const msg = await message.channel.send({
                         embed: {
                             color: client.config.embed.color,
-                            title: 'Réagissez avec les réactions pour choisir vos rôles!',
+                            title,
                             description: `${emoji.id ? `<:${emoji.name}:${emoji.id}>` : emoji.name} | ${role}`,
                             footer: { text: message.guild.name + ' - Rôles réactions', icon_url: message.guild.iconURL({ dynamic: true }) }
                         }
@@ -64,13 +64,14 @@ module.exports.run = async (client, message) => {
 
                         await found.delete();
                         msg.delete().catch(() => {});
+                        asked.delete().catch(() => {});
                         collectedMsg.first().delete().catch(() => {});
 
                         message.channel.send('Le panel a bien été supprimé.');
                     })
                     .catch(console.error);
             } else {
-                return message.channel.send('⚠️ Merci de spécifier une action entre `créer`, `ajouter` ou `retirer');
+                return message.channel.send('⚠️ Merci de spécifier une action entre `créer`, `ajouter` ou `retirer`');
             }
         })
         .catch(() => message.channel.send('Temps écoulé'));
@@ -79,7 +80,8 @@ module.exports.run = async (client, message) => {
         const prompts = [
             'Quel rôle voulez-vous donner en cliquant sur la réaction ?',
             'Quel emoji voulez-vous associer au rôle comme réaction ?\nRéagissez à ce message avec l\'emoji voulu!',
-            'Quel est l\'ID du message auquel vous voulez ajouter le rôle réaction ?'
+            'Quel est l\'ID du message auquel vous voulez ajouter le rôle réaction ?',
+            'Quel titre voulez-vous donner à votre panel ?'
         ];
 
         const one = await message.channel.send(prompts[0]);
@@ -124,11 +126,25 @@ module.exports.run = async (client, message) => {
                                     three.delete().catch(() => {});
                                     collectedMsg.first().delete().catch(() => {});
 
-                                    callback(role, msg, emoji);
+                                    await callback(role, msg, emoji);
                                 })
                                 .catch(() => message.channel.send('Temps écoulé'));
                         } else {
-                            callback(role, emoji);
+                            const three = await message.channel.send(prompts[3]);
+
+                            message.channel.awaitMessages(filter, { time: 60000, max: 1 })
+                                .then(async (collectedTitle) => {
+                                    const title = collectedTitle.first()?.content;
+                                    if(!title) return message.channel.send('⚠️ Merci de spécifier un titre!');
+
+                                    if(title.length > 250) return message.channel.send('⚠️ Le titre ne doit pas faire plus de 250 caractères.');
+
+                                    three.delete().catch(() => {});
+                                    collectedTitle.delete().catch(() => {});
+
+                                    await callback(role, emoji, title);
+                                })
+                                .catch(() => message.channel.send('Temps écoulé'));
                         }
                     })
                     .catch(() => message.channel.send('Temps écoulé'));
