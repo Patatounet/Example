@@ -1,6 +1,16 @@
 module.exports.run = async (client, message, args, data) => {
     if(!data.plugins.economy.enabled) return message.channel.send(`⚠️ Le système d'économie n'est pas activé sur ce serveur. Activez-le avec la commande \`${data.prefix}enable economy\``);
 
+    let filter = {};
+    const argsFilter = args[0]?.toLowerCase();
+    if(argsFilter === 'money' || argsFilter === 'cash') {
+        filter = { money: -1 };
+    } else if(argsFilter === 'bank') {
+        filter = { bank: -1 };
+    } else {
+        filter = { bank: -1, money: -1 }
+    }
+
     function formatRank(r) {
         switch (r) {
             case 1: r = '🥇'; break;
@@ -12,13 +22,15 @@ module.exports.run = async (client, message, args, data) => {
         return r;
     }
 
-    const allUsers = (await require('../../models/User').find().sort({
-            bank: -1,
-            money: -1
-        }).limit(10))
-        .map(user => {
+    let filter1;
+    const allUsers = (await require('../../models/User').find().sort(filter).limit(10))
+        .map((user) => {
+            if(argsFilter === 'money' || argsFilter === 'cash') filter1 = user.money;
+            else if(argsFilter === 'bank') filter1 = user.bank;
+            else filter1 = user.money + user.bank
+
             return {
-                total: user.money + user.bank,
+                total: filter1,
                 ...user
             }
         })
@@ -55,7 +67,7 @@ module.exports.help = {
     aliases: ["top-money", "moneyleaderboard", "money-leaderboard", "top"],
     category: "Economy",
     description: "Voir le top 10 des utilisateurs de RainsBot avec le plus d'argent",
-    usage: "",
+    usage: "[cash | bank | total]",
     cooldown: 5,
     memberPerms: [],
     botPerms: ["EMBED_LINKS"],
