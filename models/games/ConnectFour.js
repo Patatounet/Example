@@ -1,5 +1,5 @@
 const Game = require('./Game');
-const { black_circle } = require('../emojis');
+const { black_circle } = require('../../emojis');
 
 module.exports = class ConnectFour extends Game {
     constructor(challenger, opponent) {

@@ -1,4 +1,4 @@
-const Blackjack = require('../../models/Blackjack');
+const Blackjack = require('../../models/games/Blackjack');
 const { MessageCollector } = require('discord.js');
 
 module.exports.run = async (client, message, args, data) => {

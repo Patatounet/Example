@@ -59,7 +59,7 @@ class Hand {
         let string = "";
 
         this.cards.forEach(card => {
-          string += `${card.face} ${card.suite}\n`;
+            string += `${card.face} ${card.suite}\n`;
         });
       
         return string;
@@ -76,10 +76,10 @@ module.exports = class Blackjack extends Game {
             constructor() {
                 this.cards = [];
 
-                suites.forEach(suite => {
-                    faces.forEach(face => {
+                suites.forEach((suite) => {
+                    faces.forEach((face) => {
                         this.cards.push(new Card(face, suite));
-                    })
+                    });
                 });
             }
         

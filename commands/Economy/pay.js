@@ -1,7 +1,7 @@
 module.exports.run = async (client, message, args, data) => {
     if(!data.plugins.economy.enabled) return message.channel.send(`⚠️ Le système d'économie n'est pas activé sur ce serveur. Activez-le avec la commande \`${data.prefix}enable economy\``);
 
-    let mentionnedUser = message.mentions.members.first() || message.guild.members.cache.get(args[0]) || await message.guild.members.fetch(args[0]);
+    let mentionnedUser = message.mentions.members.first() || message.guild.members.cache.get(args[0]) || await message.guild.members.fetch(args[0]).catch(() => {});
     if(!mentionnedUser) return message.channel.send('⚠️ Ce membre n\'existe pas !');
     if(mentionnedUser.user.bot) return message.channel.send('⚠️ Vous ne pouvez pas donner de l\'argent a un bot !');
     if(mentionnedUser.id === message.author.id) return message.channel.send('⚠️ Vous ne pouvez pas donner de l\'argent à vous même (?)');

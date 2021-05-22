@@ -79,6 +79,7 @@ module.exports.run = async (client, message, args) => {
                         if(!Object.keys(attacks).includes(tmsg.content?.toLowerCase())) return message.channel.send(`⚠️ Vous devez préciser l\'une des possibilités suivantes: ${Object.keys(attacks).map((a) => `\`${a}\``)}.`);
                         tmsg.delete().catch(() => {});
 
+                        if(results.find((r) => r.author.id === tmsg.author.id)) return message.channel.send(`⚠️ Vous ne pouvez jouer d'une seule fois ${message.author} !`);
                         results.push(tmsg);
 
                         if(results.length === 2) {
@@ -92,7 +93,7 @@ module.exports.run = async (client, message, args) => {
                                 footer: { text: client.config.embed.footer, icon_url: client.user.displayAvatarURL() }
                             };
 
-                            switch (results[0].content.charAt(0) + results[1].content.charAt(0)) {
+                            switch (results[0].content.toLowerCase().charAt(0) + results[1].content.toLowerCase().charAt(0)) {
                                 case 'pc':
                                 case 'fp':
                                 case 'cf':

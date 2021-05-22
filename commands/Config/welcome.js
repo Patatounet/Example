@@ -20,8 +20,8 @@ module.exports.run = async (client, message, args, data) => {
             return message.channel.send('✅ Salon de bienvenue modifié.');
         } else {
             const filter = m => m.author.id === message.author.id;
-    
-            let MSG = await message.channel.send('Quel salon souhaitez-vous définir comme salon de bienvenue ?');
+
+            let MSG = await message.channel.send('Quel salon souhaitez-vous définir comme salon de bienvenue ? Envoyez \'MP\' pour les envoyer en Messages privés.');
 
             const c = new MessageCollector(message.channel, filter, {
                 time: 60000,
@@ -29,6 +29,17 @@ module.exports.run = async (client, message, args, data) => {
             });
 
             c.on("collect", async msg1 => {
+                if(msg1.content?.toLowerCase() === 'mp') {
+                    data.plugins.welcome.channel = null;
+                    data.markModified('plugins.welcome.channel');
+
+                    await data.save();
+
+                    c.stop();
+
+                    return message.channel.send('✅ Les messages de bienvenue s\'enverront désormais en MP.');
+                }
+
                 const channel = msg1.mentions.channels.first() || msg1.guild.channels.cache.get(msg1.content);
                 if(!channel || !message.guild.channels.resolve(channel)) return message.channel.send('⚠️ Ce salon n\'existe pas, vérifiez que j\'ai accès au salon.');
                 if(channel.type != "text") return message.channel.send('⚠️ Merci de donner un salon de type textuel. Les salons d\'annonces ne sont pas acceptés.');
@@ -48,8 +59,8 @@ module.exports.run = async (client, message, args, data) => {
                 message.channel.send('✅ Salon de bienvenue modifié. Les messages de bienvenue s\'enverront désormais dans <#' + channel.id + '>. \nFaites `' + data.prefix + 'config` pour voir la configuration actuelle du bot sur le serveur!');
             });
 
-            c.on("end", (collected, reason) => {
-                if(collected.size >= 3) return message.channel.send('Vous avez fait trop d\'essais! Refaite la commande puis réessayez.');
+            c.on("end", (_, reason) => {
+                if(reason === 'limit') return message.channel.send('Vous avez fait trop d\'essais! Refaite la commande puis réessayez.');
                 if(reason === "time") return message.channel.send('Temps écoulé');
             });
         }
@@ -77,7 +88,7 @@ module.exports.run = async (client, message, args, data) => {
             return message.channel.send('✅ Message de bienveune modifié. \nFaites `' + data.prefix + 'config` pour voir la configuration actuelle du bot sur le serveur!');
         } else {
             const filter = m => m.author.id === message.author.id;
-    
+
             let MSG = await message.channel.send('Quel message souhaitez-vous définir comme message de bienvenue ?');
 
             const c1 = new MessageCollector(message.channel, filter, {
@@ -105,8 +116,8 @@ module.exports.run = async (client, message, args, data) => {
                 message.channel.send('✅ Message de bienvenue modifié. \nFaites `' + data.prefix + 'config` pour voir la configuration actuelle du bot sur le serveur!');
             });
 
-            c1.on("end", (collected, reason) => {
-                if(collected.size >= 3) return message.channel.send('Vous avez fait trop d\'essais! Refaite la commande puis réessayez.');
+            c1.on("end", (_, reason) => {
+                if(reason === 'limit') return message.channel.send('Vous avez fait trop d\'essais! Refaite la commande puis réessayez.');
                 if(reason === "time") return message.channel.send('Temps écoulé');
             });
         }
@@ -116,7 +127,7 @@ module.exports.run = async (client, message, args, data) => {
 
             data.markModified("plugins.welcome.image");
             data.save();
-    
+
             message.channel.send('✅ Le bot n\'enverra plus d\'image de bienvenue aux nouveaux membres.');
         } else {
             data.plugins.welcome.image = true;
@@ -131,7 +142,7 @@ module.exports.run = async (client, message, args, data) => {
 
         if(!data.plugins.welcome.message && !data.plugins.welcome.image) return message.channel.send('⚠️ Vous n\'avez pas de message ni d\'image de bienvenue configurés.');
 
-        let welcomeMsg = data.plugins.welcome.message
+        const welcomeMsg = data.plugins.welcome.message
             ?.replace('{user}', message.author)
             .replace('{guildName}', message.guild.name)
             .replace('{memberCount}', message.guild.memberCount)
@@ -163,7 +174,7 @@ module.exports.help = {
     name: "welcome",
     aliases: ["welcome"],
     category: 'Config',
-    description: "Modifier le message, l'image ou le salon de bienvenue",
+    description: "Modifier le message, l'image ou le salon de bienvenue.",
     usage: "<message | channel | image | test>",
     cooldown: 5,
     memberPerms: ["MANAGE_GUILD"],

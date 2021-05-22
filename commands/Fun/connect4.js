@@ -1,5 +1,5 @@
-const ConnectFour = require('../../models/ConnectFour');
-const Game = require('../../models/Game');
+const ConnectFour = require('../../models/games/ConnectFour');
+const Game = require('../../models/games/Game');
 const { MessageCollector } = require('discord.js');
 const emojis = require('../../emojis');
 
@@ -17,13 +17,9 @@ module.exports.run = async (client, message, args) => {
     let reactions = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣"];
 
     const filter = m => m.author.id === user.id;
-    const col = new MessageCollector(message.channel, filter, {
-        max: 1,
-        time: 30000,
-    });
-
+    const col = new MessageCollector(message.channel, filter, { time: 60000 });
     col.on("collect", async (tmsg) => {
-        if(tmsg.content.toLowerCase() === "oui") {
+        if(['oui', 'ui', 'yes', 'ye', 'y', 'ouai', 'ouais'].includes(tmsg.content?.toLowerCase())) {
             const existingGame = Game.findGameByUser(client, message.author) || Game.findGameByUser(client, user);
             if(existingGame) {
                 col.stop(true);
@@ -192,7 +188,7 @@ module.exports.run = async (client, message, args) => {
                     }
                 }
             });
-        } else {
+        } else if(['non', 'no', 'n'].includes(tmsg.content?.toLowerCase()))  {
             col.stop(true);
             return message.channel.send(`${user.tag} a refusé la partie :/`);
         }

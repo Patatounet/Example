@@ -1,62 +1,60 @@
 const { enabled, disabled } = require('../../emojis');
 
 module.exports.run = (client, message, args, data) => {
-    message.channel.send({ 
+    return message.channel.send({ 
         embed: {
             color: client.config.embed.color,
-            author: {
-                icon_url: message.guild.iconURL({ dynamic: true }),
-                name: message.guild.name
-            },
+            author: { icon_url: message.guild.iconURL({ dynamic: true }), name: message.guild.name },
             description: `**Configuration actuelle du serveur ${message.guild.name}** \nSi vous souhaitez activer des plugins, faites \`${data.prefix}enable <plugin>\`. Pour en désactiver faites \`${data.prefix}disable <plugin>\`. Pour plus d'informations, faites \`${data.prefix}help\`\n\u200b`,
             fields: [
                 {
-                    name: `👋 Message de bienvenue  ${data.plugins.welcome.enabled ? enabled : disabled}`,
-                    value: `Message: \`${data.plugins.welcome.message}\` \nSalon: ${data.plugins.welcome.channel ? checkDeleted("welcome") : "`MP`"}`,
+                    name: `${data.plugins.welcome.enabled ? enabled : disabled}  👋 Message de bienvenue`,
+                    value: `\`\`\`\nMessage: ${data.plugins.welcome.message} \nSalon: ${data.plugins.welcome.channel ? checkDeleted('welcome') : 'MP'}\`\`\``,
                     inline: true
                 },
                 {
-                    name: `💔 Message d\'aurevoir  ${data.plugins.goodbye.enabled ? enabled : disabled}`,
-                    value: `Message: \`${data.plugins.goodbye.message}\` \nSalon: ${data.plugins.goodbye.channel ? checkDeleted("goodbye") : "`MP`"}`,
+                    name: `${data.plugins.goodbye.enabled ? enabled : disabled}  💔 Message d\'aurevoir`,
+                    value: `\`\`\`\nMessage: ${data.plugins.goodbye.message} \nSalon: ${data.plugins.goodbye.channel ? checkDeleted('goodbye') : 'MP'}\`\`\``,
                     inline: false
                 },
                 {
-                    name: `🥇 Levels  ${data.plugins.levels.enabled ? enabled : disabled}`,
-                    value: `Salon de montées en niveau: ${data.plugins.levels.level_up_channel ? `<#${data.plugins.levels.level_up_channel}>` : "`Aucun`"} \nMessage de montées de niveau: \`${data.plugins.levels.level_up_message ? data.plugins.levels.level_up_message : 'GG {user} ! Tu passes niveau {level} !'}\``,
+                    name: `${data.plugins.levels.enabled ? enabled : disabled}  🥇 Levels`,
+                    value: `\`\`\`\nSalon de montées en niveau: ${data.plugins.levels.level_up_channel ? checkDeleted('levels', 'level_up_channel') : '`Aucun`'} \nMessage de montées de niveau: ${data.plugins.levels.level_up_message ? data.plugins.levels.level_up_message : 'GG {user} ! Tu passes niveau {level} !'}\`\`\``,
                     inline: false
                 },
                 {
-                    name: `💵 Économie ${data.plugins.economy.enabled ? enabled : disabled}`,
-                    value: `Devise: \`${data.plugins.economy.currency}\``,
+                    name: `${data.plugins.economy.enabled ? enabled : disabled}  💵 Économie`,
+                    value: `\`\`\`\nDevise: ${data.plugins.economy.currency}\`\`\``,
                     inline: true
                 },
                 {
-                    name: `💡 Suggestions ${data.plugins.suggestion.enabled ? enabled : disabled}`,
-                    value: `Salon: ${data.plugins.suggestion.channel ? checkDeleted("suggestion") : "`Aucun`"}`,
+                    name: `${data.plugins.logs.enabled ? enabled : disabled}  ⚒️ Modération`,
+                    value: `\`\`\`\nSalon de logs: ${data.plugins.logs.channel ? checkDeleted('logs') : 'Aucun'}\`\`\``,
                     inline: true
                 },
                 {
-                    name: `⚒️ Modération ${data.plugins.logs.enabled ? enabled : disabled}`,
-                    value: `Salon de logs: ${data.plugins.logs.channel ? checkDeleted("logs") : "`Aucun`"}`,
+                    name: `${data.plugins.suggestion.enabled ? enabled : disabled}  💡 Suggestions`,
+                    value: `\`\`\`\nSalon: ${data.plugins.suggestion.channel ? checkDeleted('suggestion') : 'Aucun'}\`\`\``,
                     inline: true
                 },
                 {
-                    name: "🛡️ Protection",
-                    value: `Raidmode: ${data.plugins.protection.raidmode ? enabled : disabled}  Anti-give-role: ${data.plugins.protection.antigiverole ? enabled : disabled} \nAntiban: ${data.plugins.protection.antiban ? enabled : disabled}  Antilien: ${data.plugins.protection.antilink ? enabled : disabled} \nAntimaj: ${data.plugins.protection.antimaj ? enabled : disabled} Antispam ${data.plugins.protection.antispam?.enabled ? enabled : disabled} \n**Salon(s) ignoré(s)**: ${data.plugins.protection.ignored_channels?.length >= 1 ? data.plugins.protection.ignored_channels.map(c => `<#${c}>`).join(", ") : "`Aucun`"} \n**Rôle(s) ignoré(s)**: ${data.plugins.protection.ignored_roles?.length >= 1 ? data.plugins.protection.ignored_roles.map(r => `<@&${r}>`).join(", ") : "`Aucun`"}`,
+                    name: '🛡️ Protection',
+                    value: `\`\`\`\nCaptcha: ${data.plugins.protection.captcha?.enabled ? ' ✔️' : ' ❌'}\nRaidmode: ${data.plugins.protection.raidmode ? '✔️' : '❌'}\tAnti-give-role: ${data.plugins.protection.antigiverole ? '✔️' : '❌'} \nAntiban: ${data.plugins.protection.antiban ? ' ✔️' : ' ❌'}\tAntilien: ${data.plugins.protection.antilink ? '      ✔️' : '      ❌'} \nAntimaj: ${data.plugins.protection.antimaj ? ' ✔️' : ' ❌'}\tAntispam: ${data.plugins.protection.antispam?.enabled ? '      ✔️' : '      ❌'} \nSalon(s) ignoré(s): ${data.plugins.protection.ignored_channels?.length >= 1 ? data.plugins.protection.ignored_channels.map(c => `<#${c}>`).join(', ') : 'Aucun'} \nRôle(s) ignoré(s): ${data.plugins.protection.ignored_roles?.length >= 1 ? data.plugins.protection.ignored_roles.map(r => `<@&${r}>`).join(', ') : 'Aucun'}\`\`\``,
                     inline: true
+                },
+                {
+                    name: '🎫 Tickets',
+                    value: `\`\`\`\nNombre de panels: ${data.plugins.tickets?.panels?.length || '0'}\nSalon de logs: ${data.plugins.tickets?.logs_channel ? checkDeleted('tickets', 'logs_channel') : 'Aucun'}\nSalon des transcripts: ${data.plugins.tickets?.transcripts_channel ? checkDeleted('tickets', 'transcripts_channel') : 'Aucun'}\`\`\``
                 }
             ],
-            footer: {
-                icon_url: client.user.displayAvatarURL(),
-                text: client.config.embed.footer
-            }
+            footer: { icon_url: client.user.displayAvatarURL(), text: client.config.embed.footer }
         } 
     });
 
-    function checkDeleted(plugin) {
-        const channel = client.channels.cache.get(data.plugins[plugin].channel);
-        if(!channel) return "**Salon supprimé**";
-        else return `<#${channel.id}>`;
+    function checkDeleted(plugin, channelKey) {
+        const channel = client.channels.cache.get(data.plugins[plugin][channelKey || 'channel']);
+        if(!channel) return 'Salon supprimé';
+        else return '#' + channel.name;
     }
 }
 

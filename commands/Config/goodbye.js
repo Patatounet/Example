@@ -23,40 +23,51 @@ module.exports.run = async (client, message, args, data) => {
             return message.channel.send('✅ Salon d\'aurevoir modifié.');
         } else {
             const filter = m => m.author.id === message.author.id;
-    
-            let MSG = await message.channel.send('Quel salon souhaitez-vous définir comme salon d\'aurevoir ?');
-    
+
+            const MSG = await message.channel.send('Quel salon souhaitez-vous définir comme salon d\'aurevoir ? Envoyez \'MP\' pour les envoyer en Messages Privés.');
+
             const c = new MessageCollector(message.channel, filter, {
                 time: 60000,
                 max: 3,
             })
-    
+
             c.on("collect", async msg => {
+                if(msg.content?.toLowerCase() === 'mp') {
+                    data.plugins.goodbye.channel = null;
+                    data.markModified('plugins.goodbye.channel');
+
+                    await data.save();
+
+                    c.stop();
+
+                    return message.channel.send('✅ Les messages d\'aurevoir s\'enverront désormais en MP.');
+                }
+
                 const channel = msg.mentions.channels.first() || msg.guild.channels.cache.get(msg.content);
                 if(!channel) return message.channel.send('⚠️ Ce salon n\'existe pas, vérifiez que j\'ai accès au salon.');
                 if(channel.type != "text") return message.channel.send('⚠️ Merci de donner un salon de type textuel. Les salons d\'annonces ne sont pas acceptés.');
                 if(channel.id == data.plugins.goodbye.channel) return message.channel.send('⚠️ Ce salon est déjà défini comme salon d\'aurevoir!');
                 if(!message.guild.me.permissionsIn(channel).has('SEND_MESSAGES')) return message.channel.send('⚠️ Je n\'ai pas les permissions de parler dans ce salon, mettez moi la permission Envoyer des messages dans le salon.');
-    
+
                 c.stop(true);
 
                 MSG.delete().catch(() => {});
                 msg.delete().catch(() => {});
-    
+
                 data.plugins.goodbye = {
                     enabled: true,
                     message: data.plugins.goodbye.message,
                     channel: channel.id
                 }
-    
+
                 data.markModified("plugins.goodbye");
                 data.save();
-    
+
                 message.channel.send('✅ Salon d\'aurevoir modifié. Les messages d\'aurevoir s\'enverront désormais dans <#' + channel.id + '>. \nFaites `' + data.prefix + 'config` pour voir la configuration actuelle du bot sur le serveur!');
             });
-    
-            c.on("end", (collected, reason) => {
-                if(collected.size >= 3) return message.channel.send('Vous avez fait trop d\'essais! Refaite la commande puis réessayez.');
+
+            c.on("end", (_, reason) => {
+                if(reason === 'limit') return message.channel.send('Vous avez fait trop d\'essais! Refaite la commande puis réessayez.');
                 if(reason === "time") return message.channel.send('Temps écoulé');
             });
         }
@@ -111,8 +122,8 @@ module.exports.run = async (client, message, args, data) => {
                 message.channel.send('✅ Message d\'aurevoir modifié. \nFaites `' + data.prefix + 'config` pour voir la configuration actuelle du bot sur le serveur!');
             });
 
-            c1.on("end", (collected, reason) => {
-                if(collected.size >= 3) return message.channel.send('Vous avez fait trop d\'essais! Refaite la commande puis réessayez.');
+            c1.on("end", (_, reason) => {
+                if(reason === 'limit') return message.channel.send('Vous avez fait trop d\'essais! Refaite la commande puis réessayez.');
                 if(reason === "time") return message.channel.send('Temps écoulé');
             });
         }

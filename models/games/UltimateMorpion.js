@@ -18,7 +18,7 @@ module.exports = class UltimateMorpion extends Game {
             for (let i = 0; i < square.length; i += 3) {
                 const horizontal = check(square[i], square[i + 1], square[i + 2]);
                 if(horizontal) return horizontal;
-            } 
+            }
 
             for (let i = 0; i < 3; i++) {
                 const vertical = check(square[i], square[i + 3], square[i + 6]);

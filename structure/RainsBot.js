@@ -1,8 +1,9 @@
 module.exports = class RainsBot extends Client {
     constructor() {
         super({
-            disableMentions: "everyone",
-            partials: ['MESSAGE', 'CHANNEL', 'REACTION']
+            disableMentions: 'everyone',
+            partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
+            restTimeOffset: 250
         });
 
         this.config = require('../config');
@@ -11,20 +12,35 @@ module.exports = class RainsBot extends Client {
         this.commands = new Collection();
         this.cooldowns = new Collection();
         this.giveawaysManager = new (require('discord-giveaways').GiveawaysManager)(this, {
-            storage: "../giveaways.json",
+            storage: './giveaways.json',
             updateCountdownEvery: 10000,
             default: {
                 botsCanWin: false,
                 embedColor: this.config.embed.color,
-                embedColorEnd: "RED",
-                reaction: "🎉"
+                embedColorEnd: 'RED',
+                reaction: '🎉'
             }
         });
+        
+        CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, heigth, rayon) {
+            this.beginPath();
+            this.globalAlpha = 0.6;
+            this.moveTo(x, y + rayon);
+            this.lineTo(x, y + heigth - rayon);
+            this.quadraticCurveTo(x, y + heigth, x + rayon, y + heigth);
+            this.lineTo(x + width - rayon, y + heigth);
+            this.quadraticCurveTo(x + width, y + heigth, x + width, y + heigth - rayon);
+            this.lineTo(x + width, y + rayon);
+            this.quadraticCurveTo(x + width, y, x + width - rayon, y);
+            this.lineTo(x + rayon, y);
+            this.quadraticCurveTo(x, y, x, y + rayon);
+            this.closePath();
+        }
     }
 
     init() {
         // load commands
-        readdirSync("./commands/").forEach(dirs => {
+        readdirSync('./commands/').forEach(dirs => {
         const commands = readdirSync(`./commands/${dirs}/`).filter(files => files.endsWith('.js'));
     
             for (const file of commands) {
@@ -36,7 +52,7 @@ module.exports = class RainsBot extends Client {
         console.log(`${this.commands.size} commandes chargées`);
 
         // load events
-        readdir("./events/", (error, f) => {
+        readdir('./events/', (error, f) => {
             if(error) console.error(error);
             console.log(`${f.length} évènements en chargement`);
     
@@ -63,7 +79,7 @@ module.exports = class RainsBot extends Client {
         // DO NOT INIT THE FOLLOWING CODE !!
 
         // Autopost stats to Top.gg
-        const ap = AutoPoster(process.env.TOPGGTOKEN, this);
+        AutoPoster(process.env.TOPGGTOKEN, this);
         console.log('Posted stats to Top.gg!');
 
         // Send message and DM when a user votes for the bot
@@ -238,6 +254,13 @@ module.exports = class RainsBot extends Client {
         return String(number).replace(/(.)(?=(\d{3})+$)/g, '$1 ');
     }
 
+    formatTicketCount(ticketCount) {
+        if(ticketCount < 10) return '000' + ticketCount;
+        if(ticketCount < 100) return '00' + ticketCount;
+        if(ticketCount < 1000) return '0' + ticketCount;
+        else return ticketCount;
+    }
+
     formatLevelUpMessage(message, user, userData = {}) {
         return message
             .replace(/{user}/g, user)
@@ -266,5 +289,111 @@ module.exports = class RainsBot extends Client {
             const createUser = await new User(merged);
             createUser.save();
         }
+    }
+
+    askEmbed(message, baseEmbed = {}) {
+        return new Promise(async (resolve) => {
+            const title = await message.channel.send('Quel **titre** voulez-vous donner à votre embed ? (max. 256 chars)\nEnvoyez \'skip\' pour passer cette étape.');
+            const filter = (m) => m.author.id === message.author.id;
+            message.channel.awaitMessages(filter, { max: 1, time: 30000 })
+                .then(async (collectedTitle) => {
+                    if(!collectedTitle.first().content) return message.channel.send('❌ Merci de spécifier un texte valide!');
+
+                    await title.delete().catch(() => {});
+
+                    if(collectedTitle.first().content.toLowerCase() !== 'skip') {
+                        if(collectedTitle.first().content.length > 256) return message.channel.send('❌ Votre titre est trop long.');
+
+                        baseEmbed.title = collectedTitle.first().content;
+                    }
+
+                    await collectedTitle.first().delete().catch(() => {});
+
+                    const color = await message.channel.send('Quelle **couleur** souhaitez-vous mettre à votre embed ? La couleur peut être **hexadécimale** (#7289da), **numérique** (7506394), ou **normale** (blurple).\nEnvoyez \'skip\' pour passer, la couleur par défaut est grise (#2f3136).');
+
+                    message.channel.awaitMessages(filter, { max: 1, time: 20000 })
+                        .then(async (collectedColor) => {
+                            if(!collectedColor.first().content) return message.channel.send('❌ Merci de spécifier une couleur!');
+
+                            await color.delete().catch(() => {});
+
+                            if(collectedColor.first().content.toLowerCase() !== 'skip') {
+                                const isValid = (require('discord.js').Util.resolveColor(collectedColor.first().content.toUpperCase()) === 'NaN') ? false : true;
+
+                                if(!isValid) return message.channel.send('❌ Couleur invalide');
+
+                                baseEmbed.color = require('discord.js').Util.resolveColor(collectedColor.first().content.toUpperCase());
+                            } else {
+                                baseEmbed.color = '#2f3136';
+                            }
+
+                            await collectedColor.first().delete().catch(() => {});
+
+                            const description = await message.channel.send('Quelle **description** souhaitez-vous donner à votre embed ? (max. 2048 chars).\nEnvoyez \'skip\' pour passer cette étape.');
+
+                            message.channel.awaitMessages(filter, { max: 1, time: 50000 })
+                                .then(async (collectedDesc) => {
+                                    if(!collectedDesc.first().content) return message.channel.send('❌ Merci de spécifier du texte valide!');
+
+                                    await description.delete().catch(() => {});
+
+                                    if(collectedDesc.first().content.toLowerCase() !== 'skip') {
+                                        if(collectedDesc.first().content.length > 2048) return message.channel.send('❌ Votre description est trop longue.');
+
+                                        baseEmbed.description = collectedDesc.first().content;
+                                    }
+
+                                    await collectedDesc.first().delete().catch(() => {});
+
+                                    const thumbnail = await message.channel.send('Quelle **icône** souhaitez-vous ajouter à votre embed ? Celle-ci peut être une image ou un lien.\nEnvoyer \'skip\' pour passer cette étape.');
+
+                                    message.channel.awaitMessages(filter, { max: 1, time: 30000 })
+                                        .then(async (collectedThumbnail) => {
+                                            if(!collectedThumbnail.first().content && !collectedThumbnail.first().attachments.first()) return message.channel.send('❌ Merci d\'envoyer une image ou un lien.');
+
+                                            await thumbnail.delete().catch(() => {});
+
+                                            if(collectedThumbnail.first().content.toLowerCase() !== 'skip') {
+                                                if(collectedThumbnail.first().attachments.first()) {
+                                                    baseEmbed.thumbnail = { url: collectedThumbnail.first().attachments.first().proxyURL };
+                                                } else {
+                                                    if(!collectedThumbnail.first().content.startsWith('https://')) return message.channel.send('❌ Merci d\'envoyer un lien valide!');
+
+                                                    baseEmbed.thumbnail = { url: collectedThumbnail.first().content };
+                                                }   
+                                            }
+
+                                            const image = await message.channel.send('Quelle **image** souhaitez-vous attacher à votre embed ? Celle-ci peut être une image ou un lien.\nEnvoyer \'skip\' pour passer cette étape.');
+
+                                            message.channel.awaitMessages(filter, { max: 1, time: 30000 })
+                                                .then(async (collectedImage) => {
+                                                    if(!collectedImage.first().content && !collectedImage.first().attachments.first()) return message.channel.send('❌ Merci d\'envoyer une image ou un lien.');
+
+                                                    await image.delete().catch(() => {});
+
+                                                    if(collectedImage.first().content.toLowerCase() !== 'skip') {
+                                                        if(collectedImage.first().attachments.first()) {
+                                                            baseEmbed.image = { url: collectedImage.first().attachments.first().proxyURL };
+                                                        } else {
+                                                            if(!collectedImage.first().content.startsWith('https://')) return message.channel.send('❌ Merci d\'envoyer un lien valide!');
+
+                                                            baseEmbed.image = { url: collectedImage.first().content };
+                                                        }
+                                                    }
+
+                                                    if(!baseEmbed.title && !baseEmbed.description && !baseEmbed.image?.url) return message.channel.send('❌ Votre embed doit contenir au moins soit un titre, soit une description, soit une image.');
+
+                                                    return resolve(baseEmbed);
+                                                })
+                                                .catch(() => message.channel.send('Temps écoulé'));
+                                        })
+                                        .catch(() => message.channel.send('Temps écoulé'));
+                                })
+                                .catch(() => message.channel.send('Temps écoulé'));
+                        })
+                        .catch(() => message.channel.send('Temps écoulé'));
+                })
+                .catch(() => message.channel.send('Temps écoulé'));
+        });
     }
 }

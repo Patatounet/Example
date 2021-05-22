@@ -1,12 +1,39 @@
-const PrivateChannel = require('../models/PrivateChannel');
-
 module.exports = async (client, channel) => {
     if(channel.type == "dm") return;
 
     const data = await client.getGuild(channel.guild);
     if(!data) return;
 
-    const pChannel = await PrivateChannel.findOne({ channelID: channel.id });
+    const ticket = await require('../models/Ticket').findOne({ ticketID: channel.id });
+    if(ticket) {
+        await ticket.delete();
+
+        const logs = await channel.guild.fetchAuditLogs({
+            limit: 1,
+            type: 'CHANNEL_DELETE'
+        }).catch(() => {});
+
+        const author = (logs.entries.first() ? logs.entries.first().executor : channel.guild.members.cache.get(ticket.userID)) || 'Utilisateur inconnu';
+        if(author.bot) return;
+
+        const logsChannel = channel.guild.channels.cache.get(data.plugins.tickets.logs_channel);
+        if(logsChannel) {
+            logsChannel.send({
+                embed: {
+                    color: 'RED',
+                    author: { name: author.tag || author, icon_url: author.tag ? author.displayAvatarURL({ dynamic: true }) : null },
+                    title: 'Ticket supprimé',
+                    fields: [
+                        { name: 'Ticket créé par', value: `<@${ticket.userID}>` },
+                        { name: 'Catégorie', value: ticket.panelName }
+                    ],
+                    footer: { text: client.config.embed.footer, icon_url: client.user.displayAvatarURL() }
+                }
+            });
+        }
+    }
+
+    const pChannel = await require('../models/PrivateChannel').findOne({ channelID: channel.id });
     if(pChannel) {
         await pChannel.delete();
     }
