@@ -1,5 +1,5 @@
-const Morpion = require('../../models/Morpion');
-const Game = require('../../models/Game');
+const Morpion = require('../../models/games/Morpion');
+const Game = require('../../models/games/Game');
 const { MessageCollector } = require('discord.js');
 
 module.exports.run = async (client, message, args) => {
@@ -26,24 +26,19 @@ module.exports.run = async (client, message, args) => {
     ];
 
     const filter = m => m.author.id === user.id;
-    const col = new MessageCollector(message.channel, filter, {
-        max: 1,
-        time: 30000,
-    });
-
+    const col = new MessageCollector(message.channel, filter, { time: 60000 });
     col.on("collect", async (tmsg) => {
-        if(tmsg.content.toLowerCase() === "oui") {
+        if(['oui', 'ui', 'yes', 'ye', 'y', 'ouai', 'ouais'].includes(tmsg.content?.toLowerCase())) {
+            col.stop();
+
             const existingGame = Game.findGameByUser(client, message.author) || Game.findGameByUser(client, user);
             if(existingGame) {
-                col.stop(true);
 
                 m.delete().catch(() => {});
                 tmsg.delete().catch(() => {});
 
                 return message.channel.send('⚠️ Vous ou votre adversaire jouez déjà à une partie !');
             }
-
-            col.stop(true);
 
             m.delete().catch(() => {});
             tmsg.delete().catch(() => {});
@@ -252,8 +247,8 @@ module.exports.run = async (client, message, args) => {
                     }
                 }
             });
-        } else {
-            col.stop(true);
+        } else if(['non', 'no', 'n'].includes(tmsg.content?.toLowerCase())) {
+            col.stop();
             return message.channel.send(`${user.tag} a refusé la partie :/`);
         }
     });
@@ -265,7 +260,7 @@ module.exports.run = async (client, message, args) => {
 
 module.exports.help = {
     name: "morpion",
-    aliases: ["morpion"],
+    aliases: ["morpion", "tic-tac-toe", "tictactoe", "ttt"],
     category: "Fun",
     description: "Jouer au morpion !",
     usage: "<membre>",
