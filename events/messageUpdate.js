@@ -123,10 +123,53 @@ module.exports = async (client, oldMessage, newMessage) => {
 
     const args = newMessage.content.slice(prefix.length).split(/ +/);
     const commandName = args.shift().toLowerCase();
+    const customCommand = (await require('../models/Command').find({ guildID: newMessage.guild.id })).filter((cmd) => cmd.name.toLowerCase() === commandName)?.[0];
     const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.help.aliases && cmd.help.aliases.includes(commandName));
-    if(!command) return;
+    if(!command && !customCommand) return;
 
     if(!newMessage.guild.me.permissionsIn(newMessage.channel).has("SEND_MESSAGES") || !newMessage.guild.me.permissionsIn(newMessage.channel).has("READ_MESSAGE_HISTORY")) return;
+
+    if(customCommand) {
+        const {
+            enabled,
+            content,
+            embed,
+            image,
+            whitelisted_members,
+            whitelisted_roles,
+            whitelisted_channels
+        } = customCommand;
+
+        if(!enabled) return;
+        if(whitelisted_members && !newMessage.member.permissions.has(['ADMINISTRATOR', 'MANAGE_GUILD']) && !whitelisted_members.includes(newMessage.author.id)) return newMessage.channel.send('⚠️ Vous ne pouvez pas utiliser cette commande !');
+        if(whitelisted_roles && !newMessage.member.permissions.has(['ADMINISTRATOR', 'MANAGE_GUILD']) && !whitelisted_roles.some((r) => newMessage.member.roles.cache.has(r))) return newMessage.channel.send('⚠️ Vous ne pouvez pas utiliser cette commande !');
+        if(whitelisted_channels && !whitelisted_channels.includes(newMessage.channel.id)) return;
+
+        if(embed) {
+            embed.timestamp = new Date;
+            embed.footer = { text: newMessage.author.tag, icon_url: newMessage.author.displayAvatarURL({ dynamic: true }) };
+
+            if(image) {
+                return newMessage.channel.send(parseContent(), { embed, files: [{ attachment: image, name: 'image.png' }] });
+            } else {
+                return newMessage.channel.send(parseContent(), { embed });
+            }
+        } else if(image) {
+            return newMessage.channel.send(parseContent(), { files: [{ attachment: image, name: 'image.png' }] });
+        } else if(content) {
+            return newMessage.channel.send(parseContent());
+        } else {
+            return;
+        }
+
+        function parseContent() {
+            return content
+                ?.replace(/{author}/g, newMessage.author)
+                .replace(/{authorname}/g, newMessage.author.username)
+                .replace(/{authortag}/g, newMessage.author.tag)
+                .replace(/{channel}/g, newMessage.channel);
+        }
+    }
 
     if(command.help.botPerms.length > 0) {
         if(!newMessage.guild.me.permissionsIn(newMessage.channel).has(command.help.botPerms)) {
@@ -136,25 +179,12 @@ module.exports = async (client, oldMessage, newMessage) => {
 
     if(command.help.memberPerms.length > 0) {
         if(!newMessage.member.permissionsIn(newMessage.channel).has(command.help.memberPerms)) {
-            return newMessage.channel.send(`⚠️ ${newMessage.author}, vous n\'avez les permissions nécessaires pour faire cette commande!`);
+            return newMessage.channel.send(`⚠️ ${newMessage.author}, vous n\'avez pas les permissions nécessaires pour faire cette commande!`);
         }
     }
 
     if(command.help.args && !args.length) {
-        return newMessage.channel.send({
-            embed: {
-                color: "#FF0000",
-                author: {
-                    name: newMessage.author.username,
-                    icon_url: newMessage.author.displayAvatarURL({ dynamic: true })
-                },
-                description: `⚠️ Vous n'utilisez pas la commande correctement. \nFaites **${data.prefix}help ${commandName}** pour voir comment l'utiliser.`,
-                footer: {
-                    text: client.config.embed.footer,
-                    icon_url: client.user.displayAvatarURL()
-                }
-            }
-        })
+        return client.commands.get('help').run(client, newMessage, [command.help.name], data);
     }
 
     if(!client.cooldowns.has(command.help.name)) {
