@@ -27,7 +27,13 @@ module.exports = model("Guild", new Schema(
                         enabled: false
                     },
                     ignored_channels: [],
-                    ignored_roles: []
+                    ignored_roles: [],
+                    captcha: {
+                        enabled: false,
+                        verif_channel: null,
+                        not_verified_role: null,
+                        difficulty_level: 0
+                    }
                 },
                 welcome: {
                     enabled: false,
@@ -47,7 +53,8 @@ module.exports = model("Guild", new Schema(
                 },
                 autorole: {
                     enabled: false,
-                    role: null
+                    role: null,
+                    botRole: null
                 },
                 suggestion: {
                     enabled: false,
@@ -83,6 +90,11 @@ module.exports = model("Guild", new Schema(
                         }
                     },
                     parentID: null
+                },
+                tickets: {
+                    panels: [],
+                    transcripts_channel: null,
+                    logs_channel: null
                 }
             }
         },
@@ -99,4 +111,4 @@ module.exports = model("Guild", new Schema(
             default: null
         }
     }
-))
+));
