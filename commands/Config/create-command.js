@@ -217,7 +217,7 @@ module.exports.run = async (client, message, args, data) => {
                     });
                 }
             })
-            .catch((err) => console.error(err)/*message.channel.send('❌ Temps écoulé.')*/);
+            .catch(() => message.channel.send('❌ Temps écoulé.'));
     }
 }
 
