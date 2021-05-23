@@ -74,7 +74,7 @@ module.exports.run = async (client, message, args, data) => {
 
                                     let category = null
                                     if(categoryM.toLowerCase() !== 'aucune') {
-                                        category = collectedCategory.mentions.channels.first() || message.guild.channels.cache.get(categoryM) || collected.guild.channels.cache.find((c) => c.name.toLowerCase().includes(categoryM));
+                                        category = collectedCategory.mentions.channels.first() || message.guild.channels.cache.get(categoryM) || message.guild.channels.cache.find((c) => c.name.toLowerCase().includes(categoryM));
                                         if(!message.guild.channels.cache.get(category?.id)) return message.channel.send('⚠️ Catégorie introuvable.');
                                         if(category.type !== 'category') return message.channel.send('⚠️ Merci de spécifier une catégorie !');
                                         if(!message.guild.me.permissionsIn(category).has('MANAGE_CHANNELS')) return message.channel.send('⚠️ Je n\'ai pas les permissions de créer des salons dans cette catégorie !');
