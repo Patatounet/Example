@@ -6,6 +6,7 @@ module.exports = async (client, reaction, user) => {
     const { message } = reaction;
     if(message.partial) await message.fetch().catch(() => {});
     if(!message) return;
+    if(message.channel.type === 'dm') return;
 
     if(reaction.partial) await reaction.fetch().catch(() => {});
     if(!reaction) return;
