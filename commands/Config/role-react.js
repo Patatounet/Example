@@ -160,6 +160,6 @@ module.exports.help = {
     usage: "",
     cooldown: 5,
     memberPerms: ["MANAGE_GUILD"],
-    botPerms: ["EMBED_LINKS", "MANAGE_ROLES", "MANAGE_REACTIONS"],
+    botPerms: ["EMBED_LINKS", "MANAGE_ROLES", "MANAGE_MESSAGES"],
     args: false
 }
