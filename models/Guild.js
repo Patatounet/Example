@@ -1,7 +1,7 @@
 const { model, Schema } = require('mongoose');
 const config = require('../config');
 
-module.exports = model("Guild", new Schema(
+module.exports = model('Guild', new Schema(
     {
         _id: Schema.Types.ObjectId,
         id: String,
@@ -14,6 +14,10 @@ module.exports = model("Guild", new Schema(
             default: config.prefix
         },
         members: [],
+        locked_channels: {
+            type: Array,
+            default: []
+        },
         plugins: {
             type: Object,
             default: {
