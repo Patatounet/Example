@@ -182,32 +182,32 @@ module.exports = async (client, message) => {
         if(!(_cooldowns[message.author.id] > Date.now())) {
             _cooldowns[message.author.id] = Date.now() + 1500 * 60; // 1:30 minute cooldown
     
-            if(!userData) return;
-    
-            const generated = Math.floor(Math.random() * (25 - 15 + 1) + 15); // generate a random number between 15 and 25
-            const newExp = userData.exp + generated;
-            const newLevel = userData.level + 1
+            if(userData) {
+                const generated = Math.floor(Math.random() * (25 - 15 + 1) + 15); // generate a random number between 15 and 25
+                const newExp = userData.exp + generated;
+                const newLevel = userData.level + 1
 
-            await client.updateUserLevel(message.author, message.guild, { "members.$.exp": newExp });
+                await client.updateUserLevel(message.author, message.guild, { "members.$.exp": newExp });
 
-            if((5 * (Math.pow(userData.level, 2)) + 50 * userData.level + 100 - newExp) <= 0) { // check if necessary xp to level up is achieved
-                await client.updateUserLevel(message.author, message.guild, { "members.$.level": newLevel });
+                if((5 * (Math.pow(userData.level, 2)) + 50 * userData.level + 100 - newExp) <= 0) { // check if necessary xp to level up is achieved
+                    await client.updateUserLevel(message.author, message.guild, { "members.$.level": newLevel });
 
-                const level_up_channel = data.plugins.levels.level_up_channel;
-                if(level_up_channel && message.guild.channels.cache.get(level_up_channel)) {
-                    message.guild.channels.cache.get(level_up_channel).send(client.formatLevelUpMessage(data.plugins.levels.level_up_message ? data.plugins.levels.level_up_message : 'GG {user} ! Tu passes niveau {level} !', message.author, { level: newLevel, exp: newExp })).catch(() => {});
-                } else {
-                    message.channel.send(client.formatLevelUpMessage(data.plugins.levels.level_up_message ? data.plugins.levels.level_up_message : 'GG {user} ! Tu passes niveau {level} !', message.author, { level: newLevel, exp: newExp })).catch(() => {});
-                }
+                    const level_up_channel = data.plugins.levels.level_up_channel;
+                    if(level_up_channel && message.guild.channels.cache.get(level_up_channel)) {
+                        message.guild.channels.cache.get(level_up_channel).send(client.formatLevelUpMessage(data.plugins.levels.level_up_message ? data.plugins.levels.level_up_message : 'GG {user} ! Tu passes niveau {level} !', message.author, { level: newLevel, exp: newExp })).catch(() => {});
+                    } else {
+                        message.channel.send(client.formatLevelUpMessage(data.plugins.levels.level_up_message ? data.plugins.levels.level_up_message : 'GG {user} ! Tu passes niveau {level} !', message.author, { level: newLevel, exp: newExp })).catch(() => {});
+                    }
 
-                // give role rewards
-                const giveRole = data.plugins.levels.roles_rewards.some(obj => Object.keys(obj)[0] == `l${newLevel.toString()}`);
-    
-                if(giveRole) {
-                    const roleToGive = data.plugins.levels.roles_rewards.find(reward => Object.keys(reward)[0] == `l${newLevel.toString()}`);
-                    await message.guild.roles.fetch(roleToGive[`l${newLevel.toString()}`]).then(role => {
-                        message.guild.member(message.author).roles.add(role).catch(() => {});
-                    }).catch(() => {});
+                    // give role rewards
+                    const giveRole = data.plugins.levels.roles_rewards.some(obj => Object.keys(obj)[0] == `l${newLevel.toString()}`);
+
+                    if(giveRole) {
+                        const roleToGive = data.plugins.levels.roles_rewards.find(reward => Object.keys(reward)[0] == `l${newLevel.toString()}`);
+                        await message.guild.roles.fetch(roleToGive[`l${newLevel.toString()}`]).then(role => {
+                            message.guild.member(message.author).roles.add(role).catch(() => {});
+                        }).catch(() => {});
+                    }
                 }
             }
         }
