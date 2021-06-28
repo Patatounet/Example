@@ -54,7 +54,7 @@ module.exports = async (client, oldMessage, newMessage) => {
                             dbUser.markModified("warns");
                             dbUser.save();
 
-                            message.author.send(`Vous avez été averti sur ${newMessage.guild.name} pour **Excessive caps**.`).catch(() => {});
+                            newMessage.author.send(`Vous avez été averti sur ${newMessage.guild.name} pour **Excessive caps**.`).catch(() => {});
 
                             if(data.plugins.logs.enabled) {
                                 if(newMessage.guild.channels.cache.get(data.plugins.logs.channel)) {
